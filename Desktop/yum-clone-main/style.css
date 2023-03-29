@@ -1,0 +1,137 @@
+        body{
+            margin:0px;
+            background-color:#FFE538;
+        }
+        /*주석 좀 미리미리 달아둘걸...ㅠ*/
+        marquee{
+            position: relative;
+            width: 100%;
+            height: 40px;
+            font-size: 18px;
+            font-weight: 500;
+            color: #FFE538;
+            font-family: 'coolvetica';
+            text-align: center;
+            letter-spacing: 3px;
+            line-height:220%;
+            background-color: #000000;
+        }
+        main div{
+            width: 100%;
+            height : 698px; /*애매한 2px은 ,, 야매로 맞추기 결과물임*/
+            padding-top: 80px;
+            position: relative;
+        }
+
+        li span{
+            width: auto;
+            padding-left: 32px; /*자꾸만 야매 코딩이 되어가 ...*/
+            padding-right: 30px;
+            padding-top: 3px;
+            padding-bottom: 6px;
+
+            height: 45px;
+            font-size: 30px;
+            font-weight: 500;
+            font-family: 'coolvetica';
+            text-align: center;
+            background-color: #FFFFFF;
+            border: 3px solid #000000;
+            border-radius: 50px;
+
+            line-height: 65px;
+        }
+
+        li span a{
+            text-decoration: none;
+            color: #000000;
+
+        }
+        li{
+            list-style-type: none; /*li태그 앞에 붙는 쓸다리 없는 동그라미 지워주기 용도*/
+        }
+        header ul li{
+            float: left;
+            padding:10px;
+        }
+
+        h1{
+        /*야매로 마진 줘서 픽셀 맞추기 ㅠ*/
+            margin-top: 9px;
+            margin-left: 4px;
+            padding-right: 400px;
+        }
+        
+        footer{
+            text-align: right;
+            width: 100%;
+            height: 130px;
+            background-color: #000000;
+            clear: left;
+        }
+        footer span{
+            display: inline;
+            text-align: center;
+            line-height: 140px;
+            
+            margin-right: 50px;    
+            padding-top: 3px;/*이것도 야매로 맞춰준 코드,,,^_^,,*/
+
+            padding-right: 61px;
+            padding-left: 61px;/*이것도 야매로 맞춰준 코드,,,^_^,,*/
+
+            border: 3px solid #FFE538;
+            border-radius: 70px;
+            line-height: 130px;
+            font-size: 52px;
+        }
+        footer span a{
+            font-weight: 300;
+            font-family: 'Coolvetica';
+            font-size: 52px;
+            text-decoration: none;
+            color: #FFE538;
+            letter-spacing: 4px;
+        }
+
+        .genre_list{
+            /* display: flex; */
+            text-align: right;
+            width: 1600px;
+            
+        }
+
+        .genre_list li {
+            /*margin: 5%;*/
+            /*margin-bottom: 10px;*/
+            display: inline-block;
+            box-sizing: border-box;
+         }
+
+         genre_list li a{ 
+            position:relative;
+        }
+
+        
+        /*마우스 오버 구현해주기*/
+        .img_box{
+            height: 230px;
+            width: 230px;
+
+            top:0px;
+            left:0px;
+
+        }
+        .hover_box{ 
+            height: 230px;
+            width: 230px;
+            top:0px;
+            left:0px;
+            display: none;
+
+        }
+        ul li:hover .hover_box{
+            height: 230px;
+            width: 230px;
+            display: block;   
+        }
