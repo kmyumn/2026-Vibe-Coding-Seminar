@@ -44,9 +44,10 @@
       padding: 18px 24px 12px;
       position: sticky; top: 0; background: var(--bg); z-index: 50;
     }
-    .logo { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+    .logo { display: flex; align-items: center; }
+    .logo svg { height: 16px; width: auto; }
     .header-icons { display: flex; gap: 18px; align-items: center; }
-    .header-icons svg { width: 22px; height: 22px; cursor: pointer; stroke: var(--text); }
+    .header-icons svg { width: 22px; height: 22px; cursor: pointer; }
 
     /* ── Bottom Nav ── */
     .bottom-nav {
@@ -70,7 +71,7 @@
       color: var(--text-sub); transition: all .18s;
     }
     .nav-btn.active { background: var(--bg); color: var(--text); }
-    .nav-btn svg { width: 18px; height: 18px; stroke: currentColor; }
+    .nav-btn svg { width: 20px; height: 20px; flex-shrink: 0; }
     .nav-add {
       width: 52px; height: 52px; border-radius: 50%;
       background: var(--text); border: none; cursor: pointer;
@@ -442,10 +443,10 @@
 <!-- ════════════════════ HOME ════════════════════ -->
 <div id="homeScreen" class="screen active">
   <header class="header">
-    <div class="logo">POOM</div>
+    <div class="logo"><svg width="70" height="16" viewBox="0 0 70 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M51.2867 14.5352V15.7852H53.7867V14.5352H51.2867ZM52.5367 1.25L53.4004 0.346425C53.0387 0.000612736 52.5055 -0.0960997 52.0454 0.100614C51.5852 0.297327 51.2867 0.749545 51.2867 1.25L52.5367 1.25ZM60.1605 8.53776L59.2968 9.44133C59.78 9.90323 60.5411 9.90323 61.0243 9.44133L60.1605 8.53776ZM67.7844 1.25H69.0344C69.0344 0.749545 68.7359 0.297327 68.2757 0.100614C67.8155 -0.0960997 67.2824 0.000612736 66.9206 0.346425L67.7844 1.25ZM66.5344 14.5352V15.7852H69.0344V14.5352H66.5344ZM1.25 1.95755V0.707549H0V1.95755H1.25ZM40.7985 2.5H42.6699V0H40.7985V2.5ZM42.6699 2.5C45.0158 2.5 46.9176 4.40174 46.9176 6.74766H49.4176C49.4176 3.02103 46.3965 0 42.6699 0V2.5ZM46.9176 6.74766V8.61912H49.4176V6.74766H46.9176ZM46.9176 8.61912C46.9176 10.965 45.0158 12.8668 42.6699 12.8668V15.3668C46.3965 15.3668 49.4176 12.3458 49.4176 8.61912H46.9176ZM42.6699 12.8668H40.7985V15.3668H42.6699V12.8668ZM40.7985 12.8668C38.4525 12.8668 36.5508 10.965 36.5508 8.61912H34.0508C34.0508 12.3458 37.0718 15.3668 40.7985 15.3668V12.8668ZM36.5508 8.61912V6.74766H34.0508V8.61912H36.5508ZM36.5508 6.74766C36.5508 4.40174 38.4525 2.5 40.7985 2.5V0C37.0718 0 34.0508 3.02103 34.0508 6.74766H36.5508ZM24.2666 2.5H26.138V0H24.2666V2.5ZM26.138 2.5C28.484 2.5 30.3857 4.40174 30.3857 6.74766H32.8857C32.8857 3.02103 29.8647 0 26.138 0V2.5ZM30.3857 6.74766V8.61912H32.8857V6.74766H30.3857ZM30.3857 8.61912C30.3857 10.965 28.484 12.8668 26.138 12.8668V15.3668C29.8647 15.3668 32.8857 12.3458 32.8857 8.61912H30.3857ZM26.138 12.8668H24.2666V15.3668H26.138V12.8668ZM24.2666 12.8668C21.9207 12.8668 20.0189 10.965 20.0189 8.61912H17.5189C17.5189 12.3458 20.5399 15.3668 24.2666 15.3668V12.8668ZM20.0189 8.61912V6.74766H17.5189V8.61912H20.0189ZM20.0189 6.74766C20.0189 4.40174 21.9207 2.5 24.2666 2.5V0C20.5399 0 17.5189 3.02103 17.5189 6.74766H20.0189ZM53.7867 14.5352V1.25H51.2867V14.5352H53.7867ZM51.6729 2.15358L59.2968 9.44133L61.0243 7.63418L53.4004 0.346425L51.6729 2.15358ZM61.0243 9.44133L68.6481 2.15358L66.9206 0.346425L59.2968 7.63418L61.0243 9.44133ZM66.5344 1.25V14.5352H69.0344V1.25H66.5344ZM2.5 15.7052V1.95755H0V15.7052H2.5ZM1.25 3.20755H11.5378V0.707549H1.25V3.20755ZM11.5378 3.20755C12.7629 3.20755 13.822 4.25182 13.822 5.56251H16.322C16.322 2.91801 14.19 0.707549 11.5378 0.707549V3.20755ZM13.822 5.56251C13.822 6.87321 12.7629 7.91747 11.5378 7.91747V10.4175C14.19 10.4175 16.322 8.20702 16.322 5.56251H13.822ZM11.5378 7.91747H1.25V10.4175H11.5378V7.91747Z" fill="black"/></svg></div>
     <div class="header-icons">
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 4.5C15.866 4.5 19 7.63401 19 11.5V15.5H5V11.5C5 7.63401 8.13401 4.5 12 4.5Z" stroke="black" stroke-width="2"/><path d="M14 20.5C14 21.6046 13.1046 22.5 12 22.5C10.8954 22.5 10 21.6046 10 20.5V18.5H14V20.5Z" fill="black"/><path d="M14 3.5C14 2.39543 13.1046 1.5 12 1.5C10.8954 1.5 10 2.39543 10 3.5V5.5H14V3.5Z" fill="black"/><rect x="-1" y="1" width="16" height="4" rx="2" transform="matrix(1 0 0 -1 5 20.5)" stroke="black" stroke-width="2"/></svg>
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><line x1="2.46564" y1="4" x2="21.4656" y2="4" stroke="black" stroke-width="2" stroke-linecap="round"/><line x1="2.46564" y1="12" x2="21.4656" y2="12" stroke="black" stroke-width="2" stroke-linecap="round"/><line x1="2.46564" y1="20" x2="21.4656" y2="20" stroke="black" stroke-width="2" stroke-linecap="round"/></svg>
     </div>
   </header>
   <div class="hero-card" onclick="openUpload()">
@@ -462,10 +463,10 @@
 <!-- ════════════════════ LIBRARY ════════════════════ -->
 <div id="libraryScreen" class="screen">
   <header class="header">
-    <div class="logo">POOM</div>
+    <div class="logo"><svg width="70" height="16" viewBox="0 0 70 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M51.2867 14.5352V15.7852H53.7867V14.5352H51.2867ZM52.5367 1.25L53.4004 0.346425C53.0387 0.000612736 52.5055 -0.0960997 52.0454 0.100614C51.5852 0.297327 51.2867 0.749545 51.2867 1.25L52.5367 1.25ZM60.1605 8.53776L59.2968 9.44133C59.78 9.90323 60.5411 9.90323 61.0243 9.44133L60.1605 8.53776ZM67.7844 1.25H69.0344C69.0344 0.749545 68.7359 0.297327 68.2757 0.100614C67.8155 -0.0960997 67.2824 0.000612736 66.9206 0.346425L67.7844 1.25ZM66.5344 14.5352V15.7852H69.0344V14.5352H66.5344ZM1.25 1.95755V0.707549H0V1.95755H1.25ZM40.7985 2.5H42.6699V0H40.7985V2.5ZM42.6699 2.5C45.0158 2.5 46.9176 4.40174 46.9176 6.74766H49.4176C49.4176 3.02103 46.3965 0 42.6699 0V2.5ZM46.9176 6.74766V8.61912H49.4176V6.74766H46.9176ZM46.9176 8.61912C46.9176 10.965 45.0158 12.8668 42.6699 12.8668V15.3668C46.3965 15.3668 49.4176 12.3458 49.4176 8.61912H46.9176ZM42.6699 12.8668H40.7985V15.3668H42.6699V12.8668ZM40.7985 12.8668C38.4525 12.8668 36.5508 10.965 36.5508 8.61912H34.0508C34.0508 12.3458 37.0718 15.3668 40.7985 15.3668V12.8668ZM36.5508 8.61912V6.74766H34.0508V8.61912H36.5508ZM36.5508 6.74766C36.5508 4.40174 38.4525 2.5 40.7985 2.5V0C37.0718 0 34.0508 3.02103 34.0508 6.74766H36.5508ZM24.2666 2.5H26.138V0H24.2666V2.5ZM26.138 2.5C28.484 2.5 30.3857 4.40174 30.3857 6.74766H32.8857C32.8857 3.02103 29.8647 0 26.138 0V2.5ZM30.3857 6.74766V8.61912H32.8857V6.74766H30.3857ZM30.3857 8.61912C30.3857 10.965 28.484 12.8668 26.138 12.8668V15.3668C29.8647 15.3668 32.8857 12.3458 32.8857 8.61912H30.3857ZM26.138 12.8668H24.2666V15.3668H26.138V12.8668ZM24.2666 12.8668C21.9207 12.8668 20.0189 10.965 20.0189 8.61912H17.5189C17.5189 12.3458 20.5399 15.3668 24.2666 15.3668V12.8668ZM20.0189 8.61912V6.74766H17.5189V8.61912H20.0189ZM20.0189 6.74766C20.0189 4.40174 21.9207 2.5 24.2666 2.5V0C20.5399 0 17.5189 3.02103 17.5189 6.74766H20.0189ZM53.7867 14.5352V1.25H51.2867V14.5352H53.7867ZM51.6729 2.15358L59.2968 9.44133L61.0243 7.63418L53.4004 0.346425L51.6729 2.15358ZM61.0243 9.44133L68.6481 2.15358L66.9206 0.346425L59.2968 7.63418L61.0243 9.44133ZM66.5344 1.25V14.5352H69.0344V1.25H66.5344ZM2.5 15.7052V1.95755H0V15.7052H2.5ZM1.25 3.20755H11.5378V0.707549H1.25V3.20755ZM11.5378 3.20755C12.7629 3.20755 13.822 4.25182 13.822 5.56251H16.322C16.322 2.91801 14.19 0.707549 11.5378 0.707549V3.20755ZM13.822 5.56251C13.822 6.87321 12.7629 7.91747 11.5378 7.91747V10.4175C14.19 10.4175 16.322 8.20702 16.322 5.56251H13.822ZM11.5378 7.91747H1.25V10.4175H11.5378V7.91747Z" fill="black"/></svg></div>
     <div class="header-icons">
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 4.5C15.866 4.5 19 7.63401 19 11.5V15.5H5V11.5C5 7.63401 8.13401 4.5 12 4.5Z" stroke="black" stroke-width="2"/><path d="M14 20.5C14 21.6046 13.1046 22.5 12 22.5C10.8954 22.5 10 21.6046 10 20.5V18.5H14V20.5Z" fill="black"/><path d="M14 3.5C14 2.39543 13.1046 1.5 12 1.5C10.8954 1.5 10 2.39543 10 3.5V5.5H14V3.5Z" fill="black"/><rect x="-1" y="1" width="16" height="4" rx="2" transform="matrix(1 0 0 -1 5 20.5)" stroke="black" stroke-width="2"/></svg>
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><line x1="2.46564" y1="4" x2="21.4656" y2="4" stroke="black" stroke-width="2" stroke-linecap="round"/><line x1="2.46564" y1="12" x2="21.4656" y2="12" stroke="black" stroke-width="2" stroke-linecap="round"/><line x1="2.46564" y1="20" x2="21.4656" y2="20" stroke="black" stroke-width="2" stroke-linecap="round"/></svg>
     </div>
   </header>
   <div class="lib-header">
@@ -479,7 +480,7 @@
   <header class="header"><div class="logo">POOM</div></header>
   <div class="search-wrap">
     <div class="search-bar-wrap">
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15.4425 14.4022L20 19M16.8 10.4565C16.8 14.0224 13.9346 16.9131 10.4 16.9131C6.86537 16.9131 4 14.0224 4 10.4565C4 6.89069 6.86537 4 10.4 4C13.9346 4 16.8 6.89069 16.8 10.4565Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
       <input type="text" id="searchInput" placeholder="내용/보낸사람/날짜로 검색" oninput="doSearch(this.value)">
     </div>
   </div>
@@ -508,13 +509,13 @@
 <nav class="bottom-nav">
   <div class="nav-pill">
     <button class="nav-btn active" id="navHome" onclick="switchTab('home')">
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>홈
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 9L10.4507 3.41336C11.3841 2.79627 13.0237 2.87965 14.1127 3.59958L22 8.81378" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 8V17.6C20 18.9255 18.9767 20 17.7143 20H6.28571C5.02335 20 4 18.9255 4 17.6V8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M10.8571 11C9.14286 11 8 12 8 13.5V19H10.2857V13.5C10.2857 13.2239 10.5416 13 10.8571 13H13.1429C13.4584 13 13.7143 13.2239 13.7143 13.5V19H16V13.5C16 12 14.8571 11 13.1429 11H10.8571Z" fill="currentColor"/></svg>홈
     </button>
     <button class="nav-btn" id="navLibrary" onclick="switchTab('library')">
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>품
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M18 3H6C4.34315 3 3 4.34315 3 6V18C3 19.6569 4.34315 21 6 21H18C19.6569 21 21 19.6569 21 18V14C21 15.3062 20.1652 16.4175 19 16.8293V18C19 18.5523 18.5523 19 18 19H6C5.44772 19 5 18.5523 5 18V6C5 5.44772 5.44772 5 6 5H18C18.5523 5 19 5.44772 19 6V7.17071C20.1652 7.58254 21 8.69378 21 10V6C21 4.34315 19.6569 3 18 3Z" fill="currentColor"/><path d="M17 12C17 12.8284 16.3284 13.5 15.5 13.5C14.6716 13.5 14 12.8284 14 12C14 11.1716 14.6716 10.5 15.5 10.5C16.3284 10.5 17 11.1716 17 12Z" fill="currentColor"/><path d="M19 8C20.1046 8 21 8.89543 21 10V14C21 15.1046 20.1046 16 19 16H14C12.8954 16 12 15.1046 12 14V10C12 8.89543 12.8954 8 14 8H19Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>품
     </button>
     <button class="nav-btn" id="navSearch" onclick="switchTab('search')">
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>찾기
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15.4425 14.4022L20 19M16.8 10.4565C16.8 14.0224 13.9346 16.9131 10.4 16.9131C6.86537 16.9131 4 14.0224 4 10.4565C4 6.89069 6.86537 4 10.4 4C13.9346 4 16.8 6.89069 16.8 10.4565Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>찾기
     </button>
   </div>
   <button class="nav-add" onclick="openUpload()">
@@ -627,7 +628,7 @@
       <button class="uf-header-action" onclick="confirmSenderPicker()">완료</button>
     </div>
     <div class="uf-picker-search">
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15.4425 14.4022L20 19M16.8 10.4565C16.8 14.0224 13.9346 16.9131 10.4 16.9131C6.86537 16.9131 4 14.0224 4 10.4565C4 6.89069 6.86537 4 10.4 4C13.9346 4 16.8 6.89069 16.8 10.4565Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
       <input type="text" id="senderPickerInput" placeholder="이름/초성으로 검색" oninput="filterSenderList(this.value)" autocomplete="off">
     </div>
     <div class="uf-picker-section-label">목록에서 선택</div>
