@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>POOM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    :root {
+      --bg: #F7F0EB;
+      --white: #FFFFFF;
+      --accent: #F4846A;
+      --accent-light: #FDEAE5;
+      --text: #1A1A1A;
+      --text-sub: #888888;
+      --text-muted: #BBBBBB;
+      --border: #E8DDD6;
+      --bubble: #8CA0B3;
+      --radius-lg: 20px;
+      --radius-xl: 28px;
+      --radius-pill: 99px;
+    }
+
+    body {
+      font-family: 'Arita-dotum', 'Arita dotum', 'Noto Sans KR', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      max-width: 430px;
+      margin: 0 auto;
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* ── Screens ── */
+    .screen { display: none; min-height: 100vh; padding-bottom: 96px; }
+    .screen.active { display: block; }
+
+    /* ── Header ── */
+    .header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 24px 12px;
+      position: sticky; top: 0; background: var(--bg); z-index: 50;
+    }
+    .logo { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+    .header-icons { display: flex; gap: 18px; align-items: center; }
+    .header-icons svg { width: 22px; height: 22px; cursor: pointer; stroke: var(--text); }
+
+    /* ── Bottom Nav ── */
+    .bottom-nav {
+      position: fixed; bottom: 14px;
+      left: 50%; transform: translateX(-50%);
+      width: calc(100% - 32px); max-width: 398px;
+      background: var(--white); border-radius: var(--radius-pill);
+      padding: 8px 12px; display: flex; align-items: center; justify-content: space-between;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.10); z-index: 100;
+    }
+    .nav-group { display: flex; gap: 2px; }
+    .nav-btn {
+      display: flex; align-items: center; gap: 5px;
+      padding: 10px 14px; border-radius: var(--radius-pill);
+      border: none; background: transparent; cursor: pointer;
+      font-family: inherit; font-size: 14px; font-weight: 500;
+      color: var(--text-sub); transition: all .18s;
+    }
+    .nav-btn.active { background: var(--bg); color: var(--text); }
+    .nav-btn svg { width: 18px; height: 18px; stroke: currentColor; }
+    .nav-add {
+      width: 50px; height: 50px; border-radius: 50%;
+      background: var(--text); border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+      transition: opacity .18s;
+    }
+    .nav-add:active { opacity: .8; }
+    .nav-add svg { width: 22px; height: 22px; }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--white); border-radius: var(--radius-lg);
+      margin: 0 16px 12px; padding: 20px;
+    }
+
+    /* ── Home: Hero ── */
+    .hero-card {
+      background: var(--white); border-radius: var(--radius-lg);
+      margin: 8px 16px 24px; padding: 28px 24px 22px;
+      cursor: pointer; transition: opacity .18s;
+    }
+    .hero-card:active { opacity: .8; }
+    .hero-title { font-size: 22px; font-weight: 700; line-height: 1.4; margin-bottom: 6px; }
+    .hero-sub { font-size: 14px; color: var(--text-sub); }
+    .hero-arrow { display: flex; justify-content: flex-end; margin-top: 18px; }
+    .hero-arrow svg { width: 22px; height: 22px; stroke: var(--text-sub); }
+
+    /* ── Section Title ── */
+    .section-title { font-size: 17px; font-weight: 700; padding: 0 16px; margin-bottom: 12px; }
+
+    /* ── Message Card (Home) ── */
+    .msg-card {
+      background: var(--white); border-radius: var(--radius-lg);
+      margin: 0 16px 12px; overflow: hidden;
+      cursor: pointer; transition: opacity .18s;
+    }
+    .msg-card:active { opacity: .85; }
+    .msg-preview {
+      background: var(--bubble); padding: 16px 16px 12px; position: relative;
+    }
+    .msg-preview-img {
+      width: 100%; max-height: 180px; object-fit: cover;
+      border-radius: 12px 12px 0 0; display: block;
+    }
+    .msg-sender-name { font-size: 12px; color: rgba(255,255,255,.75); margin-bottom: 8px; }
+    .chat-bubble {
+      background: var(--white); border-radius: 4px 16px 16px 16px;
+      padding: 9px 14px; margin-bottom: 6px;
+      font-size: 13px; line-height: 1.55; color: var(--text);
+      display: inline-block; max-width: 92%;
+    }
+    .chat-time { font-size: 11px; color: rgba(255,255,255,.5); text-align: right; margin-top: 4px; }
+    .msg-footer {
+      padding: 12px 16px; display: flex; justify-content: space-between; align-items: center;
+    }
+    .msg-footer-sender { display: flex; align-items: center; gap: 5px; font-size: 13px; color: var(--text-sub); }
+    .msg-footer-sender svg { width: 13px; height: 13px; stroke: var(--text-sub); }
+    .msg-footer-date { font-size: 12px; color: var(--text-sub); }
+
+    /* ── Empty state ── */
+    .empty { display: flex; flex-direction: column; align-items: center; padding: 40px 24px; gap: 10px; text-align: center; }
+    .empty-sub { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+
+    /* ── Library ── */
+    .lib-header { padding: 16px 16px 12px; }
+    .lib-count { font-size: 24px; font-weight: 700; line-height: 1.35; }
+    .lib-count span { color: var(--accent); }
+
+    .active-folder {
+      background: var(--white); border-radius: var(--radius-lg);
+      margin: 0 16px 12px; padding: 20px;
+    }
+    .folder-label { font-size: 12px; color: var(--text-sub); display: flex; align-items: center; gap: 4px; margin-bottom: 4px; }
+    .folder-label svg { width: 13px; height: 13px; stroke: var(--text-sub); }
+    .folder-name { font-size: 16px; font-weight: 700; margin-bottom: 12px; }
+    .folder-big-count { font-size: 34px; font-weight: 700; text-align: center; margin: 12px 0 18px; }
+    .folder-big-count span { font-size: 15px; font-weight: 400; color: var(--text-sub); }
+    .folder-actions { display: flex; gap: 10px; }
+
+    .folder-item {
+      background: var(--white); border-radius: var(--radius-lg);
+      margin: 0 16px 10px; padding: 18px 20px;
+      display: flex; justify-content: space-between; align-items: center;
+      cursor: pointer; transition: opacity .15s;
+    }
+    .folder-item:active { opacity: .8; }
+    .folder-item-name { font-size: 15px; font-weight: 500; }
+    .folder-item-count { font-size: 14px; color: var(--text-sub); }
+
+    /* ── Buttons ── */
+    .btn-outline {
+      flex: 1; padding: 12px; border-radius: var(--radius-pill);
+      border: 1.5px solid var(--border); background: transparent;
+      font-family: inherit; font-size: 14px; font-weight: 500;
+      cursor: pointer; color: var(--text); transition: opacity .15s;
+    }
+    .btn-fill {
+      flex: 1; padding: 12px; border-radius: var(--radius-pill);
+      border: none; background: var(--accent);
+      font-family: inherit; font-size: 14px; font-weight: 500;
+      cursor: pointer; color: white; transition: opacity .15s;
+    }
+    .btn-outline:active, .btn-fill:active { opacity: .8; }
+    .btn-primary {
+      width: 100%; padding: 16px; border-radius: var(--radius-pill);
+      border: none; background: var(--accent);
+      font-family: inherit; font-size: 16px; font-weight: 600;
+      cursor: pointer; color: white; margin-top: 8px; transition: opacity .15s;
+    }
+    .btn-primary:active { opacity: .85; }
+    .btn-primary:disabled { opacity: .45; cursor: not-allowed; }
+
+    /* ── Search ── */
+    .search-wrap { padding: 8px 16px 0; }
+    .search-bar {
+      display: flex; align-items: center; gap: 10px;
+      background: var(--white); border-radius: var(--radius-pill);
+      padding: 14px 20px;
+    }
+    .search-bar input {
+      border: none; outline: none; font-family: inherit; font-size: 15px;
+      background: transparent; flex: 1; color: var(--text);
+    }
+    .search-bar input::placeholder { color: var(--text-muted); }
+    .search-bar svg { width: 18px; height: 18px; stroke: var(--text-muted); flex-shrink: 0; }
+    .search-hint {
+      text-align: center; font-size: 12px; color: var(--text-sub);
+      line-height: 1.6; padding: 10px 20px 0;
+      display: flex; align-items: flex-start; gap: 4px; justify-content: center;
+    }
+    .search-hint svg { width: 13px; height: 13px; flex-shrink: 0; margin-top: 2px; stroke: var(--text-muted); }
+    .search-empty-wrap { display: flex; flex-direction: column; align-items: center; padding: 32px; }
+    .search-result-label { font-size: 13px; color: var(--text-sub); padding: 12px 16px 8px; }
+    .search-list { background: var(--white); border-radius: var(--radius-lg); margin: 0 16px; overflow: hidden; }
+    .search-list-item {
+      display: flex; gap: 12px; padding: 14px 16px;
+      border-bottom: 1px solid var(--border); cursor: pointer; transition: opacity .15s;
+    }
+    .search-list-item:last-child { border-bottom: none; }
+    .search-list-item:active { opacity: .8; }
+    .search-thumb {
+      width: 58px; height: 58px; border-radius: 12px;
+      object-fit: cover; flex-shrink: 0; background: var(--bubble);
+    }
+    .search-thumb-ph {
+      width: 58px; height: 58px; border-radius: 12px;
+      background: var(--bubble); flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .search-thumb-ph svg { width: 20px; height: 20px; stroke: rgba(255,255,255,.5); }
+    .search-item-info { flex: 1; min-width: 0; }
+    .search-item-sender { font-size: 14px; font-weight: 600; margin-bottom: 3px; }
+    .search-item-text { font-size: 12px; color: var(--text-sub); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .search-item-meta { font-size: 11px; color: var(--text-muted); margin-top: 5px; }
+
+    /* ── Modal ── */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,.35); z-index: 200; align-items: flex-end;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--white); border-radius: 28px 28px 0 0;
+      width: 100%; max-height: 92vh; overflow-y: auto; padding: 20px 24px 40px;
+      animation: slide-up .28s ease;
+    }
+    @keyframes slide-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
+    .modal-handle { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 22px; }
+    .modal-title { font-size: 19px; font-weight: 700; margin-bottom: 20px; }
+
+    /* ── Upload Zone ── */
+    .upload-zone {
+      border: 2px dashed var(--border); border-radius: var(--radius-lg);
+      padding: 36px 20px; text-align: center;
+      cursor: pointer; background: var(--bg);
+      transition: border-color .2s, background .2s; margin-bottom: 20px;
+    }
+    .upload-zone.drag { border-color: var(--accent); background: var(--accent-light); }
+    .upload-zone.has-img { padding: 0; border: none; background: none; cursor: default; }
+    .upload-zone.has-img img {
+      width: 100%; border-radius: var(--radius-lg);
+      max-height: 260px; object-fit: contain; display: block;
+    }
+    .upload-icon-wrap {
+      width: 48px; height: 48px; border-radius: 50%;
+      background: var(--accent-light); display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 12px;
+    }
+    .upload-icon-wrap svg { width: 22px; height: 22px; stroke: var(--accent); }
+    .upload-text { font-size: 15px; font-weight: 500; color: var(--text-sub); }
+    .upload-subtext { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+    .upload-change-btn {
+      margin-top: 10px; font-size: 13px; color: var(--text-sub);
+      background: none; border: none; cursor: pointer; font-family: inherit;
+      text-decoration: underline; text-underline-offset: 2px;
+    }
+
+    /* ── OCR Status ── */
+    .ocr-status {
+      background: var(--bg); border-radius: 14px; padding: 14px 16px;
+      margin-bottom: 16px; display: none;
+    }
+    .ocr-status.on { display: block; }
+    .ocr-label { font-size: 12px; color: var(--text-sub); margin-bottom: 8px; }
+    .ocr-bar-track { height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+    .ocr-bar { height: 100%; background: var(--accent); border-radius: 2px; width: 0; transition: width .25s; }
+
+    /* ── Form ── */
+    .form-group { margin-bottom: 16px; }
+    .form-label { font-size: 12px; font-weight: 600; color: var(--text-sub); margin-bottom: 8px; letter-spacing: .3px; }
+    .form-input {
+      width: 100%; padding: 13px 16px;
+      border: 1.5px solid var(--border); border-radius: 14px;
+      font-family: inherit; font-size: 15px; color: var(--text);
+      background: var(--white); outline: none; transition: border-color .18s;
+      -webkit-appearance: none;
+    }
+    .form-input:focus { border-color: var(--accent); }
+
+    /* ── Sender Chips ── */
+    .sender-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+    .s-chip {
+      display: flex; align-items: center; gap: 5px;
+      background: var(--bg); border: 1.5px solid var(--border);
+      border-radius: var(--radius-pill); padding: 7px 13px;
+      font-size: 13px; cursor: pointer; transition: all .15s;
+    }
+    .s-chip.sel { background: var(--accent-light); border-color: var(--accent); color: var(--accent); }
+    .s-chip svg { width: 12px; height: 12px; stroke: currentColor; }
+
+    /* ── Autocomplete ── */
+    .autocomplete {
+      background: var(--white); border: 1.5px solid var(--border);
+      border-radius: 14px; overflow: hidden; margin-top: 4px; display: none;
+    }
+    .autocomplete.on { display: block; }
+    .ac-item {
+      padding: 11px 16px; font-size: 14px; cursor: pointer;
+      display: flex; align-items: center; gap: 8px; color: var(--text);
+    }
+    .ac-item:hover { background: var(--bg); }
+    .ac-item svg { width: 13px; height: 13px; stroke: var(--text-muted); }
+
+    /* ── Extracted Text ── */
+    .extracted-box { margin-bottom: 16px; display: none; }
+    .extracted-content {
+      background: var(--bg); border-radius: 14px; padding: 14px 16px;
+      font-size: 13px; line-height: 1.7; color: var(--text);
+      max-height: 110px; overflow-y: auto;
+    }
+
+    /* ── Detail Screen ── */
+    .detail-screen {
+      display: none; position: fixed; inset: 0;
+      background: var(--white); z-index: 150; overflow-y: auto;
+    }
+    .detail-screen.open { display: block; }
+    .detail-header {
+      display: flex; align-items: center; gap: 14px;
+      padding: 16px 20px; position: sticky; top: 0;
+      background: var(--white); z-index: 10; border-bottom: 1px solid var(--border);
+    }
+    .detail-header-title { font-size: 16px; font-weight: 600; flex: 1; }
+    .back-btn {
+      width: 34px; height: 34px; display: flex; align-items: center;
+      justify-content: center; cursor: pointer; border-radius: 50%;
+      transition: background .15s;
+    }
+    .back-btn:hover { background: var(--bg); }
+    .back-btn svg { width: 22px; height: 22px; stroke: var(--text); }
+    .detail-img-wrap {
+      background: #EDE4DC; display: flex;
+      align-items: center; justify-content: center; min-height: 280px;
+    }
+    .detail-img-wrap img { width: 100%; object-fit: contain; display: block; max-height: 500px; }
+    .detail-info { padding: 20px; }
+    .detail-meta { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+    .detail-sender { font-size: 18px; font-weight: 700; }
+    .detail-date-folder { text-align: right; }
+    .detail-date { font-size: 13px; color: var(--text-sub); }
+    .detail-folder { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .detail-memo { font-size: 14px; color: var(--text-sub); margin-bottom: 12px; }
+    .detail-text { background: var(--bg); border-radius: 14px; padding: 14px 16px; font-size: 13px; line-height: 1.75; }
+    .detail-actions { display: flex; gap: 10px; margin-top: 20px; }
+
+    /* ── Folder Detail ── */
+    .folder-detail-header { padding: 16px; }
+    .folder-detail-stat {
+      background: var(--bg); border-radius: var(--radius-lg);
+      padding: 14px 20px; text-align: center; margin: 0 16px 16px;
+    }
+    .folder-detail-stat-label { font-size: 13px; color: var(--text-sub); margin-bottom: 4px; }
+    .folder-detail-stat-count { font-size: 28px; font-weight: 700; }
+    .folder-detail-stat-count span { font-size: 14px; font-weight: 400; color: var(--text-sub); }
+    .msg-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 16px 16px; }
+    .msg-grid-item { border-radius: 14px; overflow: hidden; cursor: pointer; transition: opacity .15s; }
+    .msg-grid-item:active { opacity: .8; }
+    .msg-grid-thumb {
+      width: 100%; aspect-ratio: 3/4; object-fit: cover;
+      background: var(--bubble); display: block;
+    }
+    .msg-grid-ph {
+      width: 100%; aspect-ratio: 3/4; background: var(--bubble);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .msg-grid-ph svg { width: 28px; height: 28px; stroke: rgba(255,255,255,.4); }
+    .msg-grid-info { background: var(--white); padding: 8px 10px; }
+    .msg-grid-sender { font-size: 12px; font-weight: 600; }
+    .msg-grid-date { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+    /* ── Toast ── */
+    .toast {
+      position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
+      background: rgba(26,26,26,.88); color: white;
+      padding: 11px 22px; border-radius: var(--radius-pill);
+      font-size: 14px; z-index: 500;
+      opacity: 0; transition: opacity .25s; pointer-events: none; white-space: nowrap;
+    }
+    .toast.show { opacity: 1; }
+
+    /* ── Spinner ── */
+    .spinner {
+      width: 20px; height: 20px; border: 2px solid var(--border);
+      border-top-color: var(--accent); border-radius: 50%;
+      animation: spin .7s linear infinite; display: inline-block;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    ::-webkit-scrollbar { display: none; }
+  </style>
+</head>
+<body>
+
+<!-- ════════════════════ HOME ════════════════════ -->
+<div id="homeScreen" class="screen active">
+  <header class="header">
+    <div class="logo">POOM</div>
+    <div class="header-icons">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </div>
+  </header>
+
+  <div class="hero-card" onclick="openUpload()">
+    <div class="hero-title">간직하고 싶은<br>메시지가 있나요?</div>
+    <div class="hero-sub">지금, POOM에 보관하세요</div>
+    <div class="hero-arrow">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><polyline points="9 18 15 12 9 6"/></svg>
+    </div>
+  </div>
+
+  <div class="section-title">최근 받은 마음</div>
+  <div id="homeRecent"></div>
+
+  <div class="section-title" style="margin-top:6px">최근 다시 읽은 마음</div>
+  <div id="homeReRead"></div>
+</div>
+
+<!-- ════════════════════ LIBRARY ════════════════════ -->
+<div id="libraryScreen" class="screen">
+  <header class="header">
+    <div class="logo">POOM</div>
+    <div class="header-icons">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </div>
+  </header>
+  <div class="lib-header">
+    <div class="lib-count" id="libCount"><span>0개</span>의 마음이<br>보관되어있어요</div>
+  </div>
+  <div id="folderList"></div>
+</div>
+
+<!-- ════════════════════ SEARCH ════════════════════ -->
+<div id="searchScreen" class="screen">
+  <header class="header">
+    <div class="logo">POOM</div>
+  </header>
+  <div class="search-wrap">
+    <div class="search-bar">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="searchInput" placeholder="내용/보낸사람/날짜로 검색" oninput="doSearch(this.value)">
+    </div>
+  </div>
+  <div class="search-hint">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    맞춤법을 틀리거나 정확한 표현이 아니어도 AI가 비슷한 내용을 찾아드려요
+  </div>
+  <div id="searchResult">
+    <div class="search-empty-wrap">
+      <svg width="160" height="160" viewBox="0 0 160 160" fill="none">
+        <ellipse cx="80" cy="148" rx="34" ry="6" fill="#E8DDD6"/>
+        <rect x="55" y="95" width="50" height="56" rx="10" fill="#B8C4CC" opacity=".55"/>
+        <circle cx="80" cy="72" r="24" fill="#D4C4BA"/>
+        <!-- speech bubble -->
+        <rect x="28" y="20" width="104" height="50" rx="14" fill="#D8D0C8"/>
+        <polygon points="46,70 36,86 60,70" fill="#D8D0C8"/>
+        <circle cx="55" cy="45" r="4" fill="#BEB8B0"/>
+        <rect x="65" y="41" width="36" height="8" rx="4" fill="#BEB8B0" opacity=".6"/>
+        <rect x="55" y="54" width="50" height="6" rx="3" fill="#BEB8B0" opacity=".35"/>
+        <!-- heart -->
+        <path d="M77 33 C77 29 73 27 71 30 C69 27 65 29 65 33 C65 37 71 42 71 42 C71 42 77 37 77 33Z" fill="#F4846A" opacity=".7"/>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════ BOTTOM NAV ════════════════════ -->
+<nav class="bottom-nav">
+  <div class="nav-group">
+    <button class="nav-btn active" id="navHome" onclick="switchTab('home')">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>홈
+    </button>
+    <button class="nav-btn" id="navLibrary" onclick="switchTab('library')">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>품
+    </button>
+    <button class="nav-btn" id="navSearch" onclick="switchTab('search')">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>찾기
+    </button>
+  </div>
+  <button class="nav-add" onclick="openUpload()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+  </button>
+</nav>
+
+<!-- ════════════════════ UPLOAD MODAL ════════════════════ -->
+<div class="modal-overlay" id="uploadModal" onclick="handleOverlayClick(event)">
+  <div class="modal" id="modalBody">
+    <div class="modal-handle"></div>
+    <div class="modal-title">마음 보관하기</div>
+
+    <div class="upload-zone" id="uploadZone"
+         onclick="triggerFileInput()"
+         ondragover="onDragOver(event)"
+         ondragleave="onDragLeave(event)"
+         ondrop="onDrop(event)">
+      <div class="upload-icon-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+      </div>
+      <div class="upload-text">이미지를 업로드해주세요</div>
+      <div class="upload-subtext">채팅 캡처, 선물 사진 등</div>
+    </div>
+    <input type="file" id="fileInput" accept="image/*" style="display:none" onchange="onFileSelect(event)">
+
+    <div class="ocr-status" id="ocrStatus">
+      <div class="ocr-label" id="ocrLabel">보낸 사람을 분석중이에요...</div>
+      <div class="ocr-bar-track"><div class="ocr-bar" id="ocrBar"></div></div>
+    </div>
+
+    <div class="form-group">
+      <div class="form-label">보낸 사람</div>
+      <div class="sender-chips" id="senderChips"></div>
+      <input type="text" class="form-input" id="senderInput" placeholder="이름을 입력하세요"
+             oninput="onSenderInput(this.value)" autocomplete="off">
+      <div class="autocomplete" id="autocomplete"></div>
+    </div>
+
+    <div class="form-group">
+      <div class="form-label">날짜</div>
+      <input type="date" class="form-input" id="dateInput">
+    </div>
+
+    <div class="form-group">
+      <div class="form-label">폴더</div>
+      <select class="form-input" id="folderSelect" onchange="onFolderChange()"></select>
+    </div>
+
+    <div class="form-group">
+      <div class="form-label">메모 (선택)</div>
+      <input type="text" class="form-input" id="memoInput" placeholder="간단한 메모를 남겨보세요">
+    </div>
+
+    <div class="extracted-box" id="extractedBox">
+      <div class="form-label" style="margin-bottom:8px">인식된 텍스트</div>
+      <div class="extracted-content" id="extractedContent"></div>
+    </div>
+
+    <button class="btn-primary" id="saveBtn" onclick="saveMessage()" disabled>보관하기</button>
+  </div>
+</div>
+
+<!-- ════════════════════ MESSAGE DETAIL ════════════════════ -->
+<div class="detail-screen" id="detailScreen">
+  <div class="detail-header">
+    <div class="back-btn" onclick="closeDetail()">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><polyline points="15 18 9 12 15 6"/></svg>
+    </div>
+    <div class="detail-header-title" id="detailTitle"></div>
+  </div>
+  <div class="detail-img-wrap"><img id="detailImg" src="" alt=""></div>
+  <div class="detail-info">
+    <div class="detail-meta">
+      <div class="detail-sender" id="detailSender"></div>
+      <div class="detail-date-folder">
+        <div class="detail-date" id="detailDate"></div>
+        <div class="detail-folder" id="detailFolder"></div>
+      </div>
+    </div>
+    <div class="detail-memo" id="detailMemo"></div>
+    <div class="detail-text" id="detailText" style="display:none"></div>
+  </div>
+</div>
+
+<!-- ════════════════════ FOLDER DETAIL ════════════════════ -->
+<div class="detail-screen" id="folderDetailScreen">
+  <div class="detail-header">
+    <div class="back-btn" onclick="closeFolderDetail()">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><polyline points="15 18 9 12 15 6"/></svg>
+    </div>
+    <div class="detail-header-title" id="folderDetailTitle"></div>
+  </div>
+  <div id="folderDetailBody"></div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════ IndexedDB ═══════════════════
+const DB = { name: 'poom_v1', version: 1, store: 'messages' };
+let idb;
+
+function openDB() {
+  return new Promise((res, rej) => {
+    const req = indexedDB.open(DB.name, DB.version);
+    req.onupgradeneeded = e => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains(DB.store)) {
+        const s = db.createObjectStore(DB.store, { keyPath: 'id' });
+        s.createIndex('sender', 'sender');
+        s.createIndex('date', 'date');
+        s.createIndex('createdAt', 'createdAt');
+      }
+    };
+    req.onsuccess = e => { idb = e.target.result; res(); };
+    req.onerror = () => rej(req.error);
+  });
+}
+
+function tx(mode = 'readonly') { return idb.transaction(DB.store, mode).objectStore(DB.store); }
+const dbGetAll = () => new Promise((r, j) => { const q = tx().getAll(); q.onsuccess = () => r(q.result); q.onerror = () => j(q.error); });
+const dbAdd    = item => new Promise((r, j) => { const q = tx('readwrite').add(item); q.onsuccess = () => r(); q.onerror = () => j(q.error); });
+const dbPut    = item => new Promise((r, j) => { const q = tx('readwrite').put(item); q.onsuccess = () => r(); q.onerror = () => j(q.error); });
+const dbDel    = id   => new Promise((r, j) => { const q = tx('readwrite').delete(id); q.onsuccess = () => r(); q.onerror = () => j(q.error); });
+
+// ═══════════════════ State ═══════════════════
+let msgs = [];
+let curImageData = null;
+let curExtractedText = '';
+let curFile = null;
+
+// ═══════════════════ Init ═══════════════════
+async function init() {
+  await openDB();
+  msgs = await dbGetAll();
+  msgs.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  renderHome();
+  renderLibrary();
+  document.getElementById('dateInput').value = today();
+}
+
+function today() { return new Date().toISOString().slice(0, 10); }
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
+function esc(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+// ═══════════════════ Navigation ═══════════════════
+function switchTab(tab) {
+  ['home','library','search'].forEach(t => {
+    document.getElementById(t+'Screen').classList.toggle('active', t === tab);
+    document.getElementById('nav'+t.charAt(0).toUpperCase()+t.slice(1)).classList.toggle('active', t === tab);
+  });
+  if (tab === 'library') renderLibrary();
+  if (tab === 'home') renderHome();
+}
+
+// ═══════════════════ Home Render ═══════════════════
+function renderHome() {
+  const recent   = [...msgs].sort((a,b) => new Date(b.createdAt)-new Date(a.createdAt)).slice(0,3);
+  const reread   = [...msgs].filter(m=>m.lastReadAt).sort((a,b)=>new Date(b.lastReadAt)-new Date(a.lastReadAt)).slice(0,2);
+
+  const rEl = document.getElementById('homeRecent');
+  rEl.innerHTML = recent.length ? recent.map(msgCard).join('') : emptyState('아직 보관된 마음이 없어요<br>첫 번째 메시지를 추가해보세요');
+
+  const rrEl = document.getElementById('homeReRead');
+  rrEl.innerHTML = reread.length ? reread.map(msgCard).join('') : `<div style="padding:16px 16px 20px; color:var(--text-muted); font-size:13px; text-align:center;">다시 읽은 마음이 없어요</div>`;
+}
+
+function msgCard(m) {
+  const thumb = m.imageData
+    ? `<img class="msg-preview-img" src="${m.imageData}" alt="">`
+    : `<div style="height:140px;display:flex;align-items:center;justify-content:center;">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.4)" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+      </div>`;
+
+  const preview = m.extractedText
+    ? `<div class="chat-bubble">${esc(m.extractedText.slice(0, 60))}${m.extractedText.length>60?'...':''}</div>`
+    : (m.memo ? `<div class="chat-bubble">${esc(m.memo)}</div>` : '');
+
+  return `
+    <div class="msg-card" onclick="openDetail('${m.id}')">
+      <div class="msg-preview">
+        <div class="msg-sender-name">${esc(m.sender)}</div>
+        ${thumb}
+        ${preview}
+        ${m.date ? `<div class="chat-time">${m.date}</div>` : ''}
+      </div>
+      <div class="msg-footer">
+        <div class="msg-footer-sender">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+          ${esc(m.sender)}
+        </div>
+        <div class="msg-footer-date">${m.date || ''}</div>
+      </div>
+    </div>`;
+}
+
+function emptyState(text) {
+  return `<div class="empty">
+    <svg width="52" height="52" viewBox="0 0 52 52" fill="none">
+      <circle cx="26" cy="26" r="24" stroke="#E8DDD6" stroke-width="2"/>
+      <path d="M14 26 Q26 14 38 26 Q26 38 14 26Z" fill="#E8DDD6"/>
+    </svg>
+    <div class="empty-sub">${text}</div>
+  </div>`;
+}
+
+// ═══════════════════ Library Render ═══════════════════
+function renderLibrary() {
+  document.getElementById('libCount').innerHTML = `<span>${msgs.length}개</span>의 마음이<br>보관되어있어요`;
+
+  const byFolder = {};
+  msgs.forEach(m => {
+    const f = m.folder || '기본';
+    (byFolder[f] = byFolder[f]||[]).push(m);
+  });
+
+  const entries = Object.entries(byFolder);
+  const el = document.getElementById('folderList');
+
+  if (!entries.length) {
+    el.innerHTML = emptyState('아직 보관된 마음이 없어요');
+    return;
+  }
+
+  const [first, ...rest] = entries;
+  const [fname, fmsgs] = first;
+
+  let html = `
+    <div class="active-folder">
+      <div class="folder-label">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+        기본 폴더
+      </div>
+      <div class="folder-name">${esc(fname)}</div>
+      <div class="folder-big-count">${fmsgs.length} <span>개</span></div>
+      <div class="folder-actions">
+        <button class="btn-outline" onclick="openFolderDetail('${esc(fname)}')">분석</button>
+        <button class="btn-fill" onclick="openFolderDetail('${esc(fname)}')">편집</button>
+      </div>
+    </div>`;
+
+  rest.forEach(([n, ms]) => {
+    html += `
+      <div class="folder-item" onclick="openFolderDetail('${esc(n)}')">
+        <div class="folder-item-name">${esc(n)}</div>
+        <div class="folder-item-count">${ms.length} 개</div>
+      </div>`;
+  });
+
+  el.innerHTML = html;
+}
+
+// ═══════════════════ Upload Modal ═══════════════════
+function openUpload() {
+  document.getElementById('uploadModal').classList.add('open');
+  renderSenderChips();
+  buildFolderSelect();
+}
+
+function closeUpload() {
+  document.getElementById('uploadModal').classList.remove('open');
+  resetUploadForm();
+}
+
+function handleOverlayClick(e) {
+  if (e.target === document.getElementById('uploadModal')) closeUpload();
+}
+
+function resetUploadForm() {
+  curImageData = null; curExtractedText = ''; curFile = null;
+  const zone = document.getElementById('uploadZone');
+  zone.className = 'upload-zone';
+  zone.onclick = triggerFileInput;
+  zone.innerHTML = `
+    <div class="upload-icon-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+    </div>
+    <div class="upload-text">이미지를 업로드해주세요</div>
+    <div class="upload-subtext">채팅 캡처, 선물 사진 등</div>`;
+  document.getElementById('fileInput').value = '';
+  document.getElementById('senderInput').value = '';
+  document.getElementById('memoInput').value = '';
+  document.getElementById('dateInput').value = today();
+  document.getElementById('ocrStatus').classList.remove('on');
+  document.getElementById('ocrBar').style.width = '0';
+  document.getElementById('extractedBox').style.display = 'none';
+  document.getElementById('saveBtn').disabled = true;
+  document.getElementById('autocomplete').classList.remove('on');
+  document.querySelectorAll('.s-chip').forEach(c => c.classList.remove('sel'));
+}
+
+function triggerFileInput() { document.getElementById('fileInput').click(); }
+
+function onDragOver(e) { e.preventDefault(); document.getElementById('uploadZone').classList.add('drag'); }
+function onDragLeave(e) { document.getElementById('uploadZone').classList.remove('drag'); }
+function onDrop(e) {
+  e.preventDefault();
+  document.getElementById('uploadZone').classList.remove('drag');
+  const f = e.dataTransfer.files[0];
+  if (f && f.type.startsWith('image/')) processFile(f);
+}
+function onFileSelect(e) { if (e.target.files[0]) processFile(e.target.files[0]); }
+
+function processFile(file) {
+  curFile = file;
+  const reader = new FileReader();
+  reader.onload = e => {
+    curImageData = e.target.result;
+    const zone = document.getElementById('uploadZone');
+    zone.className = 'upload-zone has-img';
+    zone.onclick = null;
+    zone.innerHTML = `
+      <img src="${curImageData}" alt="업로드된 이미지">
+      <button class="upload-change-btn" onclick="triggerFileInput()">다른 이미지로 변경</button>`;
+
+    // Try to parse date from filename
+    const dm = file.name.match(/(\d{4})[-_.]?(\d{2})[-_.]?(\d{2})/);
+    if (dm) document.getElementById('dateInput').value = `${dm[1]}-${dm[2]}-${dm[3]}`;
+
+    document.getElementById('saveBtn').disabled = false;
+    runOCR(curImageData);
+  };
+  reader.readAsDataURL(file);
+}
+
+// ═══════════════════ OCR ═══════════════════
+async function runOCR(imgData) {
+  const status = document.getElementById('ocrStatus');
+  const bar    = document.getElementById('ocrBar');
+  const label  = document.getElementById('ocrLabel');
+  status.classList.add('on');
+  label.textContent = '보낸 사람을 분석중이에요...';
+  bar.style.width = '0';
+
+  try {
+    const worker = await Tesseract.createWorker('kor+eng', 1, {
+      logger: m => {
+        if (m.status === 'recognizing text') bar.style.width = (m.progress * 100) + '%';
+      }
+    });
+    const { data: { text } } = await worker.recognize(imgData);
+    await worker.terminate();
+
+    curExtractedText = text;
+    bar.style.width = '100%';
+    label.textContent = '분석 완료';
+
+    // Try to detect sender
+    const detected = detectSender(text);
+    if (detected) {
+      document.getElementById('senderInput').value = detected;
+      setSenderChip(detected);
+    }
+
+    if (text.trim()) {
+      document.getElementById('extractedBox').style.display = 'block';
+      document.getElementById('extractedContent').textContent = text.slice(0, 400);
+    }
+
+    setTimeout(() => status.classList.remove('on'), 1200);
+  } catch (err) {
+    console.warn('OCR error:', err);
+    label.textContent = '자동 인식 실패 — 직접 입력해주세요';
+    setTimeout(() => status.classList.remove('on'), 2000);
+  }
+}
+
+function detectSender(text) {
+  const known = knownSenders();
+
+  // 1. Check known senders first
+  for (const s of known) {
+    if (text.includes(s)) return s;
+  }
+
+  // 2. Try to find a Korean name (2–4 chars) in the first 10 non-empty lines
+  const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+  for (const line of lines.slice(0, 10)) {
+    const m = line.match(/^([가-힣]{2,4})$/);
+    if (m) return m[1];
+  }
+
+  return null;
+}
+
+// ═══════════════════ Sender Chips ═══════════════════
+function knownSenders() { return [...new Set(msgs.map(m => m.sender).filter(Boolean))]; }
+
+function renderSenderChips() {
+  const senders = knownSenders().slice(0, 8);
+  const el = document.getElementById('senderChips');
+  el.innerHTML = senders.map(s => `
+    <div class="s-chip" data-name="${esc(s)}" onclick="selectSender('${esc(s)}')">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      ${esc(s)}
+    </div>`).join('');
+}
+
+function selectSender(name) {
+  setSenderChip(name);
+  document.getElementById('senderInput').value = name;
+  document.getElementById('autocomplete').classList.remove('on');
+}
+
+function setSenderChip(name) {
+  document.querySelectorAll('.s-chip').forEach(c => c.classList.toggle('sel', c.dataset.name === name));
+}
+
+function onSenderInput(val) {
+  document.querySelectorAll('.s-chip').forEach(c => c.classList.toggle('sel', c.dataset.name === val));
+  const senders = knownSenders().filter(s => s.includes(val));
+  const ac = document.getElementById('autocomplete');
+  if (val && senders.length) {
+    ac.innerHTML = senders.map(s => `
+      <div class="ac-item" onclick="selectSender('${esc(s)}')">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+        ${esc(s)}
+      </div>`).join('');
+    ac.classList.add('on');
+  } else {
+    ac.classList.remove('on');
+  }
+}
+
+// ═══════════════════ Folder Select ═══════════════════
+function buildFolderSelect() {
+  const folders = [...new Set(msgs.map(m => m.folder || '기본'))];
+  if (!folders.includes('기본')) folders.unshift('기본');
+  const sel = document.getElementById('folderSelect');
+  sel.innerHTML = folders.map(f => `<option value="${esc(f)}">${esc(f)}</option>`).join('')
+    + `<option value="__new__">+ 새 폴더 만들기</option>`;
+}
+
+function onFolderChange() {
+  const sel = document.getElementById('folderSelect');
+  if (sel.value === '__new__') {
+    const name = prompt('새 폴더 이름을 입력하세요');
+    if (name && name.trim()) {
+      const opt = document.createElement('option');
+      opt.value = name.trim(); opt.textContent = name.trim();
+      sel.insertBefore(opt, sel.lastElementChild);
+      sel.value = name.trim();
+    } else {
+      sel.value = sel.options[0].value;
+    }
+  }
+}
+
+// ═══════════════════ Save ═══════════════════
+async function saveMessage() {
+  const sender = document.getElementById('senderInput').value.trim();
+  const date   = document.getElementById('dateInput').value;
+  const folder = document.getElementById('folderSelect').value;
+  const memo   = document.getElementById('memoInput').value.trim();
+
+  if (!sender) { showToast('보낸 사람을 입력해주세요'); document.getElementById('senderInput').focus(); return; }
+  if (!curImageData) { showToast('이미지를 업로드해주세요'); return; }
+
+  const btn = document.getElementById('saveBtn');
+  btn.disabled = true;
+  btn.textContent = '보관중...';
+
+  const item = {
+    id: uid(), sender, date,
+    folder: folder === '__new__' ? '기본' : folder,
+    memo, imageData: curImageData,
+    extractedText: curExtractedText,
+    createdAt: new Date().toISOString(), lastReadAt: null
+  };
+
+  try {
+    await dbAdd(item);
+    msgs.unshift(item);
+    closeUpload();
+    renderHome();
+    renderLibrary();
+    showToast('마음이 보관되었어요');
+  } catch (e) {
+    console.error(e);
+    showToast('저장에 실패했어요');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '보관하기';
+  }
+}
+
+// ═══════════════════ Detail ═══════════════════
+async function openDetail(id) {
+  const m = msgs.find(x => x.id === id);
+  if (!m) return;
+
+  m.lastReadAt = new Date().toISOString();
+  await dbPut(m);
+
+  document.getElementById('detailTitle').textContent = m.sender;
+  document.getElementById('detailImg').src = m.imageData || '';
+  document.getElementById('detailSender').textContent = m.sender;
+  document.getElementById('detailDate').textContent = m.date || '';
+  document.getElementById('detailFolder').textContent = m.folder || '기본';
+
+  const memoEl = document.getElementById('detailMemo');
+  memoEl.textContent = m.memo || '';
+  memoEl.style.display = m.memo ? 'block' : 'none';
+
+  const textEl = document.getElementById('detailText');
+  if (m.extractedText && m.extractedText.trim()) {
+    textEl.textContent = m.extractedText;
+    textEl.style.display = 'block';
+  } else {
+    textEl.style.display = 'none';
+  }
+
+  document.getElementById('detailScreen').classList.add('open');
+}
+
+function closeDetail() {
+  document.getElementById('detailScreen').classList.remove('open');
+  renderHome();
+}
+
+// ═══════════════════ Folder Detail ═══════════════════
+function openFolderDetail(folderName) {
+  const fmsgs = msgs.filter(m => (m.folder||'기본') === folderName)
+    .sort((a,b) => new Date(b.date||b.createdAt) - new Date(a.date||a.createdAt));
+
+  document.getElementById('folderDetailTitle').textContent = folderName;
+
+  const body = document.getElementById('folderDetailBody');
+  if (!fmsgs.length) {
+    body.innerHTML = emptyState('이 폴더에 아직 마음이 없어요');
+  } else {
+    body.innerHTML = `
+      <div class="folder-detail-stat">
+        <div class="folder-detail-stat-label">${esc(folderName)}</div>
+        <div class="folder-detail-stat-count">${fmsgs.length}<span> 개</span></div>
+      </div>
+      <div class="msg-grid">
+        ${fmsgs.map(m => `
+          <div class="msg-grid-item" onclick="openDetail('${m.id}')">
+            ${m.imageData
+              ? `<img class="msg-grid-thumb" src="${m.imageData}" alt="${esc(m.sender)}">`
+              : `<div class="msg-grid-ph"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>`}
+            <div class="msg-grid-info">
+              <div class="msg-grid-sender">${esc(m.sender)}</div>
+              <div class="msg-grid-date">${m.date||''}</div>
+            </div>
+          </div>`).join('')}
+      </div>`;
+  }
+
+  document.getElementById('folderDetailScreen').classList.add('open');
+}
+
+function closeFolderDetail() {
+  document.getElementById('folderDetailScreen').classList.remove('open');
+}
+
+// ═══════════════════ Search ═══════════════════
+function doSearch(q) {
+  const el = document.getElementById('searchResult');
+
+  if (!q.trim()) {
+    el.innerHTML = `<div class="search-empty-wrap">
+      <svg width="160" height="160" viewBox="0 0 160 160" fill="none">
+        <ellipse cx="80" cy="148" rx="34" ry="6" fill="#E8DDD6"/>
+        <rect x="55" y="95" width="50" height="56" rx="10" fill="#B8C4CC" opacity=".55"/>
+        <circle cx="80" cy="72" r="24" fill="#D4C4BA"/>
+        <rect x="28" y="20" width="104" height="50" rx="14" fill="#D8D0C8"/>
+        <polygon points="46,70 36,86 60,70" fill="#D8D0C8"/>
+        <circle cx="55" cy="45" r="4" fill="#BEB8B0"/>
+        <rect x="65" y="41" width="36" height="8" rx="4" fill="#BEB8B0" opacity=".6"/>
+        <rect x="55" y="54" width="50" height="6" rx="3" fill="#BEB8B0" opacity=".35"/>
+        <path d="M77 33 C77 29 73 27 71 30 C69 27 65 29 65 33 C65 37 71 42 71 42 C71 42 77 37 77 33Z" fill="#F4846A" opacity=".7"/>
+      </svg>
+    </div>`;
+    return;
+  }
+
+  const ql = q.toLowerCase();
+  const found = msgs.filter(m =>
+    (m.sender||'').toLowerCase().includes(ql) ||
+    (m.extractedText||'').toLowerCase().includes(ql) ||
+    (m.memo||'').toLowerCase().includes(ql) ||
+    (m.date||'').includes(ql) ||
+    (m.folder||'').toLowerCase().includes(ql)
+  );
+
+  if (!found.length) {
+    el.innerHTML = `<div class="empty" style="padding-top:32px">
+      <div class="empty-sub">"${esc(q)}"로 저장된 마음을 찾지 못했어요</div>
+    </div>`;
+    return;
+  }
+
+  el.innerHTML = `
+    <div class="search-result-label">${found.length}개의 마음을 찾았어요</div>
+    <div class="search-list">
+      ${found.map(m => `
+        <div class="search-list-item" onclick="openDetail('${m.id}')">
+          ${m.imageData
+            ? `<img class="search-thumb" src="${m.imageData}" alt="">`
+            : `<div class="search-thumb-ph"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>`}
+          <div class="search-item-info">
+            <div class="search-item-sender">${esc(m.sender)}</div>
+            <div class="search-item-text">${esc((m.extractedText||m.memo||'').slice(0,48))}</div>
+            <div class="search-item-meta">${m.date||''} · ${esc(m.folder||'기본')}</div>
+          </div>
+        </div>`).join('')}
+    </div>`;
+}
+
+// ═══════════════════ Toast ═══════════════════
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ═══════════════════ Start ═══════════════════
+init();
+</script>
+</body>
+</html>
