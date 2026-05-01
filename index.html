@@ -39,8 +39,8 @@
     :root {
       --bg: #F7F0EB;
       --white: #FFFFFF;
-      --accent: #F4846A;
-      --accent-light: #FDEAE5;
+      --accent: #FFB6A4;
+      --accent-light: #FFF0EC;
       --text: #1A1A1A;
       --text-sub: #888888;
       --text-muted: #BBBBBB;
@@ -132,7 +132,7 @@
 
     /* ── Home ── */
     .hero-card {
-      background: var(--white); border-radius: var(--radius-lg);
+      background: var(--white); border-radius: var(--radius-lg) var(--radius-lg) var(--radius-lg) 0;
       margin: 8px 16px 24px; padding: 28px 24px 22px;
       cursor: pointer; transition: opacity .18s;
     }
@@ -245,16 +245,75 @@
     }
     .back-btn:hover { background: var(--bg); }
     .back-btn svg { width: 22px; height: 22px; stroke: var(--text); }
-    .detail-img-wrap { background: #EDE4DC; display: flex; align-items: center; justify-content: center; min-height: 280px; }
-    .detail-img-wrap img { width: 100%; object-fit: contain; display: block; max-height: 500px; }
-    .detail-info { padding: 20px; }
-    .detail-meta { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
-    .detail-sender { font-size: 18px; font-weight: 700; }
-    .detail-date-folder { text-align: right; }
-    .detail-date { font-size: 13px; color: var(--text-sub); }
-    .detail-folder { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
-    .detail-memo { font-size: 14px; color: var(--text-sub); margin-bottom: 12px; }
-    .detail-text { background: var(--bg); border-radius: 14px; padding: 14px 16px; font-size: 13px; line-height: 1.75; }
+    /* ── Message Detail ── */
+    .detail-screen { padding-bottom: 80px; }
+    .detail-header-right { display: flex; align-items: center; gap: 4px; }
+    .detail-header-right svg { width: 22px; height: 22px; cursor: pointer; }
+
+    .detail-msg-card {
+      background: var(--white); border-radius: var(--radius-lg) var(--radius-lg) var(--radius-lg) 0;
+      margin: 8px 16px 4px; overflow: hidden;
+    }
+    .detail-msg-img { width: 100%; display: block; object-fit: cover; }
+    .detail-msg-ph { min-height: 260px; background: #EDE4DC; display: flex; align-items: center; justify-content: center; }
+    .detail-msg-footer { padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    .detail-msg-sender { font-size: 14px; font-weight: 600; }
+    .detail-msg-meta { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-sub); }
+    .detail-msg-meta svg { width: 12px; height: 12px; stroke: var(--text-sub); flex-shrink: 0; }
+    .detail-memo-row { padding: 8px 16px 0; font-size: 13px; color: var(--text-sub); }
+
+    .detail-section { padding: 24px 16px 0; }
+    .detail-section-title { font-size: 15px; font-weight: 700; margin-bottom: 14px; }
+    .detail-section-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+    .detail-section-link { display: flex; align-items: center; gap: 2px; font-size: 13px; color: var(--text-sub); cursor: pointer; }
+    .detail-section-link svg { width: 14px; height: 14px; }
+
+    .detail-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+    .detail-tag {
+      padding: 7px 14px; border-radius: var(--radius-pill) var(--radius-pill) var(--radius-pill) 0;
+      background: var(--bg); font-size: 13px; font-weight: 500; color: var(--text);
+    }
+    .detail-tag.main {
+      padding: 10px 20px; font-size: 16px; font-weight: 700;
+      background: var(--accent); color: white;
+    }
+
+    .detail-stat-card {
+      background: var(--white); border-radius: var(--radius-lg) var(--radius-lg) var(--radius-lg) 0;
+      padding: 20px; margin-top: 14px; text-align: center;
+    }
+    .detail-stat-num { font-size: 28px; font-weight: 700; color: var(--text); }
+    .detail-stat-num span { color: var(--accent); }
+    .detail-stat-sub { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+
+    .detail-related { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
+    .detail-related::-webkit-scrollbar { display: none; }
+    .detail-rel-card {
+      flex-shrink: 0; width: 160px; background: var(--white);
+      border-radius: var(--radius-lg) var(--radius-lg) var(--radius-lg) 0; overflow: hidden;
+      cursor: pointer;
+    }
+    .detail-rel-img { width: 100%; height: 100px; object-fit: cover; display: block; }
+    .detail-rel-ph { width: 100%; height: 100px; background: #EDE4DC; }
+    .detail-rel-footer { padding: 8px 10px; font-size: 12px; color: var(--text-sub); }
+
+    .detail-all-list { display: flex; flex-direction: column; gap: 10px; padding-bottom: 0; }
+
+    .detail-bottom-bar {
+      position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+      width: 100%; max-width: 430px;
+      padding: 12px 16px 28px; background: var(--bg);
+      border-top: 1px solid var(--border);
+    }
+    .detail-cta-btn {
+      width: 100%; padding: 16px; border-radius: var(--radius-pill) var(--radius-pill) var(--radius-pill) 0;
+      border: none; background: var(--text); color: white;
+      font-family: inherit; font-size: 15px; font-weight: 600; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      transition: opacity .18s;
+    }
+    .detail-cta-btn:active { opacity: .8; }
+    .detail-cta-btn svg { width: 18px; height: 18px; }
 
     /* ── Folder Detail ── */
     .fd-search {
@@ -508,7 +567,7 @@
 
 <!-- ════════════════════ SEARCH ════════════════════ -->
 <div id="searchScreen" class="screen">
-  <header class="header"><div class="logo">POOM</div></header>
+  <header class="header"><div class="logo"><svg width="70" height="16" viewBox="0 0 70 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M51.2867 14.5352V15.7852H53.7867V14.5352H51.2867ZM52.5367 1.25L53.4004 0.346425C53.0387 0.000612736 52.5055 -0.0960997 52.0454 0.100614C51.5852 0.297327 51.2867 0.749545 51.2867 1.25L52.5367 1.25ZM60.1605 8.53776L59.2968 9.44133C59.78 9.90323 60.5411 9.90323 61.0243 9.44133L60.1605 8.53776ZM67.7844 1.25H69.0344C69.0344 0.749545 68.7359 0.297327 68.2757 0.100614C67.8155 -0.0960997 67.2824 0.000612736 66.9206 0.346425L67.7844 1.25ZM66.5344 14.5352V15.7852H69.0344V14.5352H66.5344ZM1.25 1.95755V0.707549H0V1.95755H1.25ZM40.7985 2.5H42.6699V0H40.7985V2.5ZM42.6699 2.5C45.0158 2.5 46.9176 4.40174 46.9176 6.74766H49.4176C49.4176 3.02103 46.3965 0 42.6699 0V2.5ZM46.9176 6.74766V8.61912H49.4176V6.74766H46.9176ZM46.9176 8.61912C46.9176 10.965 45.0158 12.8668 42.6699 12.8668V15.3668C46.3965 15.3668 49.4176 12.3458 49.4176 8.61912H46.9176ZM42.6699 12.8668H40.7985V15.3668H42.6699V12.8668ZM40.7985 12.8668C38.4525 12.8668 36.5508 10.965 36.5508 8.61912H34.0508C34.0508 12.3458 37.0718 15.3668 40.7985 15.3668V12.8668ZM36.5508 8.61912V6.74766H34.0508V8.61912H36.5508ZM36.5508 6.74766C36.5508 4.40174 38.4525 2.5 40.7985 2.5V0C37.0718 0 34.0508 3.02103 34.0508 6.74766H36.5508ZM24.2666 2.5H26.138V0H24.2666V2.5ZM26.138 2.5C28.484 2.5 30.3857 4.40174 30.3857 6.74766H32.8857C32.8857 3.02103 29.8647 0 26.138 0V2.5ZM30.3857 6.74766V8.61912H32.8857V6.74766H30.3857ZM30.3857 8.61912C30.3857 10.965 28.484 12.8668 26.138 12.8668V15.3668C29.8647 15.3668 32.8857 12.3458 32.8857 8.61912H30.3857ZM26.138 12.8668H24.2666V15.3668H26.138V12.8668ZM24.2666 12.8668C21.9207 12.8668 20.0189 10.965 20.0189 8.61912H17.5189C17.5189 12.3458 20.5399 15.3668 24.2666 15.3668V12.8668ZM20.0189 8.61912V6.74766H17.5189V8.61912H20.0189ZM20.0189 6.74766C20.0189 4.40174 21.9207 2.5 24.2666 2.5V0C20.5399 0 17.5189 3.02103 17.5189 6.74766H20.0189ZM53.7867 14.5352V1.25H51.2867V14.5352H53.7867ZM51.6729 2.15358L59.2968 9.44133L61.0243 7.63418L53.4004 0.346425L51.6729 2.15358ZM61.0243 9.44133L68.6481 2.15358L66.9206 0.346425L59.2968 7.63418L61.0243 9.44133ZM66.5344 1.25V14.5352H69.0344V1.25H66.5344ZM2.5 15.7052V1.95755H0V15.7052H2.5ZM1.25 3.20755H11.5378V0.707549H1.25V3.20755ZM11.5378 3.20755C12.7629 3.20755 13.822 4.25182 13.822 5.56251H16.322C16.322 2.91801 14.19 0.707549 11.5378 0.707549V3.20755ZM13.822 5.56251C13.822 6.87321 12.7629 7.91747 11.5378 7.91747V10.4175C14.19 10.4175 16.322 8.20702 16.322 5.56251H13.822ZM11.5378 7.91747H1.25V10.4175H11.5378V7.91747Z" fill="black"/></svg></div></header>
   <div class="search-wrap">
     <div class="search-bar-wrap">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15.4425 14.4022L20 19M16.8 10.4565C16.8 14.0224 13.9346 16.9131 10.4 16.9131C6.86537 16.9131 4 14.0224 4 10.4565C4 6.89069 6.86537 4 10.4 4C13.9346 4 16.8 6.89069 16.8 10.4565Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
@@ -586,19 +645,17 @@
     <div class="back-btn" onclick="closeDetail()">
       <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><polyline points="15 18 9 12 15 6"/></svg>
     </div>
-    <div class="detail-header-title" id="detailTitle"></div>
-  </div>
-  <div class="detail-img-wrap"><img id="detailImg" src="" alt=""></div>
-  <div class="detail-info">
-    <div class="detail-meta">
-      <div class="detail-sender" id="detailSender"></div>
-      <div class="detail-date-folder">
-        <div class="detail-date" id="detailDate"></div>
-        <div class="detail-folder" id="detailFolder"></div>
-      </div>
+    <div class="detail-header-title">받은 마음</div>
+    <div class="detail-header-right">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="7" r="1" fill="black"/><circle cx="12" cy="12" r="9" stroke="black" stroke-width="2"/><rect x="11" y="9" width="2" height="9" rx="1" fill="black"/></svg>
     </div>
-    <div class="detail-memo" id="detailMemo"></div>
-    <div class="detail-text" id="detailText" style="display:none"></div>
+  </div>
+  <div id="detailBody"></div>
+  <div class="detail-bottom-bar" id="detailBottomBar">
+    <button class="detail-cta-btn" id="detailCtaBtn">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 4L12 20M20 12L4 12" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
+      <span id="detailCtaText">엽서 만들기</span>
+    </button>
   </div>
 </div>
 
@@ -1237,24 +1294,94 @@ async function openDetail(id) {
   m.lastReadAt = new Date().toISOString();
   await dbPut(m);
 
-  document.getElementById('detailTitle').textContent = m.sender;
-  document.getElementById('detailImg').src = m.imageData || '';
-  document.getElementById('detailSender').textContent = m.sender;
-  document.getElementById('detailDate').textContent = m.date || '';
-  document.getElementById('detailFolder').textContent = m.folder || '기본';
+  const sender = m.sender || '알 수 없음';
+  const shortName = sender.length <= 3 ? sender : sender.slice(0, 2);
+  const folder = m.folder || '기본';
+  const fromSameSender = msgs.filter(x => x.sender === sender && x.id !== m.id)
+    .sort((a,b) => new Date(b.date||b.createdAt) - new Date(a.date||a.createdAt));
+  const readCount = msgs.filter(x => x.sender === sender).reduce((s,x) => s + (x.lastReadAt ? 1 : 0), 0);
+  const tags = extractTags(m.extractedText || '');
 
-  const memoEl = document.getElementById('detailMemo');
-  memoEl.textContent = m.memo || '';
-  memoEl.style.display = m.memo ? 'block' : 'none';
+  const imgHtml = m.imageData
+    ? `<img class="detail-msg-img" src="${m.imageData}" alt="">`
+    : `<div class="detail-msg-ph"></div>`;
 
-  const textEl = document.getElementById('detailText');
-  if (m.extractedText && m.extractedText.trim()) {
-    textEl.textContent = m.extractedText;
-    textEl.style.display = 'block';
-  } else {
-    textEl.style.display = 'none';
-  }
+  const relCards = fromSameSender.slice(0, 8).map(x => `
+    <div class="detail-rel-card" onclick="openDetail('${x.id}')">
+      ${x.imageData ? `<img class="detail-rel-img" src="${x.imageData}" alt="">` : `<div class="detail-rel-ph"></div>`}
+      <div class="detail-rel-footer">${x.date || ''}</div>
+    </div>`).join('');
+
+  const allCards = fromSameSender.map(x => `
+    <div class="msg-card" onclick="openDetail('${x.id}')">
+      ${x.imageData ? `<img class="msg-card-img" src="${x.imageData}" alt="">` : `<div class="msg-card-img-ph"></div>`}
+      <div class="msg-footer">
+        <div class="msg-footer-sender">${esc(x.sender)}</div>
+        <div class="msg-footer-date">${x.date || ''}</div>
+      </div>
+    </div>`).join('');
+
+  const tagsHtml = tags.length
+    ? tags.map((t,i) => `<span class="detail-tag${i===0?' main':''}">${esc(t)}</span>`).join('')
+    : '<span class="detail-tag">아직 분석 중이에요</span>';
+
+  document.getElementById('detailBody').innerHTML = `
+    <div class="detail-msg-card">
+      ${imgHtml}
+      <div class="detail-msg-footer">
+        <div class="detail-msg-sender">${esc(sender)}</div>
+        <div class="detail-msg-meta">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          ${m.date || ''}
+          &nbsp;
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+          ${esc(folder)}
+        </div>
+      </div>
+    </div>
+    ${m.memo ? `<div class="detail-memo-row">${esc(m.memo)}</div>` : ''}
+
+    <div class="detail-section">
+      <div class="detail-section-title">${esc(shortName)}님에게 많이 받은 표현</div>
+      <div class="detail-tags">${tagsHtml}</div>
+      <div class="detail-stat-card">
+        <div class="detail-stat-num">마음마다 <span>${readCount || 1}번</span>씩 다시 읽었어요</div>
+        <div class="detail-stat-sub">${esc(sender)}님의 마음을 소중히 읽고 있어요</div>
+      </div>
+    </div>
+
+    ${fromSameSender.length ? `
+    <div class="detail-section">
+      <div class="detail-section-row">
+        <div class="detail-section-title" style="margin-bottom:0">자주 다시 읽은 마음</div>
+      </div>
+      <div class="detail-related">${relCards}</div>
+    </div>
+
+    <div class="detail-section" style="padding-bottom:16px">
+      <div class="detail-section-row">
+        <div class="detail-section-title" style="margin-bottom:0">${esc(sender)}님에게 받은 마음 ${fromSameSender.length + 1}</div>
+        <div class="detail-section-link" onclick="openFolderDetail('${esc(folder)}')">
+          더보기
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M10.2739 5L15.6478 10.8217C16.0014 11.2048 16.0014 11.7952 15.6478 12.1783L10.2739 18" stroke="black" stroke-width="2" stroke-linecap="round"/></svg>
+        </div>
+      </div>
+      <div class="detail-all-list" style="margin-top:14px">${allCards}</div>
+    </div>` : ''}
+  `;
+
+  document.getElementById('detailCtaText').textContent = `${shortName}님에게 보낼 엽서 만들기`;
   document.getElementById('detailScreen').classList.add('open');
+  document.getElementById('detailScreen').scrollTop = 0;
+}
+
+function extractTags(text) {
+  if (!text || text.trim().length < 10) return [];
+  const stopWords = new Set(['이','가','을','를','은','는','의','에','에서','로','으로','와','과','도','만','이다','있다','없다','하다','그','이','저','것','수','때','더','또','그리고','하지만','그래서','아','어','으','을','ㅎ','ㅋ','ㅠ']);
+  const wordCount = {};
+  text.replace(/[^가-힣\s]/g, ' ').split(/\s+/).filter(w => w.length >= 2 && !stopWords.has(w))
+    .forEach(w => { wordCount[w] = (wordCount[w]||0) + 1; });
+  return Object.entries(wordCount).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([w])=>w);
 }
 
 function closeDetail() {
