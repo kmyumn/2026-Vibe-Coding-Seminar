@@ -645,10 +645,19 @@ let ufPickedSender = null; // selection in picker
 let ufOcrDone = false;
 
 // ═══════════════════ Init ═══════════════════
+let dbAvailable = false;
+
 async function init() {
-  await openDB();
-  msgs = await dbGetAll();
-  msgs.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  try {
+    await openDB();
+    dbAvailable = true;
+    msgs = await dbGetAll();
+    msgs.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  } catch (e) {
+    // IndexedDB unavailable (sandbox/incognito) — run in memory-only mode
+    console.warn('IndexedDB unavailable, using memory mode:', e);
+    dbAvailable = false;
+  }
   renderHome();
   renderLibrary();
 }
@@ -774,7 +783,24 @@ function onFileSelect(e) {
 }
 
 function loadImage(file) {
-  return new Promise(r => { const rd = new FileReader(); rd.onload = e => r(e.target.result); rd.readAsDataURL(file); });
+  return new Promise(r => {
+    const rd = new FileReader();
+    rd.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        // Compress: cap at 1080px wide, JPEG 0.82 quality (~200-400KB per screenshot)
+        const MAX = 1080;
+        const scale = Math.min(1, MAX / img.width);
+        const canvas = document.createElement('canvas');
+        canvas.width  = Math.round(img.width  * scale);
+        canvas.height = Math.round(img.height * scale);
+        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+        r(canvas.toDataURL('image/jpeg', 0.82));
+      };
+      img.src = e.target.result;
+    };
+    rd.readAsDataURL(file);
+  });
 }
 
 function renderProcCards() {
@@ -970,16 +996,21 @@ async function saveAll() {
         extractedText: item.extractedText,
         createdAt: new Date().toISOString(), lastReadAt: null
       };
-      await dbAdd(msg);
+      if (dbAvailable) await dbAdd(msg);  // persist; fall through to memory on DB error
       msgs.unshift(msg);
     }
     cancelUpload();
     renderHome();
     renderLibrary();
-    showToast(`${ufItems.length}개의 마음이 보관되었어요`);
+    const label = dbAvailable ? '개의 마음이 보관되었어요' : '개 저장됨 (이 세션에서만 유지)';
+    showToast(`${ufItems.length}${label}`);
   } catch(e) {
-    console.error(e);
-    showToast('저장에 실패했어요');
+    console.error('saveAll error:', e);
+    const reason =
+      e?.name === 'QuotaExceededError' ? '저장 공간이 부족해요. 브라우저 데이터를 정리해주세요.' :
+      e?.name === 'SecurityError'      ? '이 환경에서는 저장이 제한되어 있어요. 일반 브라우저 탭에서 열어주세요.' :
+      `저장에 실패했어요 (${e?.name ?? '알 수 없는 오류'})`;
+    showToast(reason);
   } finally {
     btn.disabled = false;
     btn.textContent = '저장하기';
