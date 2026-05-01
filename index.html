@@ -407,9 +407,10 @@
        UPLOAD FLOW (3-step full-screen)
     ══════════════════════════════════════ */
     .uf-overlay {
-      display: none; position: fixed; inset: 0;
+      display: none; position: fixed; top: 0; bottom: 0;
+      left: 50%; transform: translateX(-50%);
+      width: 100%; max-width: 430px;
       background: var(--bg); z-index: 200; overflow-y: auto;
-      max-width: 430px; left: 50%; transform: translateX(-50%);
     }
     .uf-overlay.open { display: block; }
 
@@ -459,6 +460,16 @@
     .uf-bar-track { height: 4px; background: var(--border); border-radius: 2px; margin: 0 20px; overflow: hidden; }
     .uf-bar { height: 100%; background: var(--accent); border-radius: 2px; width: 0; transition: width .3s; }
 
+    /* ── Carousel ── */
+    .uf-carousel-wrap { overflow: hidden; padding: 0 16px; }
+    .uf-carousel-track {
+      display: flex;
+      width: 100%;
+      transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+      will-change: transform;
+    }
+    .uf-carousel-track .uf-proc-card { flex: none; width: 100%; margin: 0 0 12px; }
+
     /* ── Step 2: Confirm ── */
     .uf-section-label {
       font-size: 15px; font-weight: 700; padding: 16px 20px 8px;
@@ -505,6 +516,19 @@
     .uf-done-sender svg { width: 13px; height: 13px; stroke: var(--text-sub); }
 
     .uf-date-text { font-size: 13px; color: var(--text-sub); }
+
+    /* Memo input for OCR-pending cards */
+    .uf-memo-wrap { padding: 0 16px 12px; }
+    .uf-memo-input {
+      width: 100%; box-sizing: border-box;
+      border: 1.5px solid var(--border); border-radius: 12px;
+      padding: 10px 13px; font-family: inherit; font-size: 13px;
+      color: var(--text); background: var(--bg);
+      resize: none; min-height: 72px; outline: none; line-height: 1.5;
+      transition: border-color .15s;
+    }
+    .uf-memo-input::placeholder { color: var(--text-muted); }
+    .uf-memo-input:focus { border-color: var(--accent); }
 
     /* ── Step 3: Sender Picker ── */
     .uf-picker-search {
@@ -738,7 +762,9 @@
       <div class="uf-big-title">스크린샷을<br>인식하고 있어요</div>
       <div class="uf-big-sub">스크린샷을 자동으로 분류하고 있어요.<br>작업이 끝나면 알려드릴게요!</div>
     </div>
-    <div id="ufProcCards"></div>
+    <div class="uf-carousel-wrap">
+      <div class="uf-carousel-track" id="ufCarouselTrack"></div>
+    </div>
     <div class="uf-progress-row">
       <span id="ufProgressLabel" class="uf-progress-label">1 / 1장</span>
     </div>
@@ -832,10 +858,12 @@ const dbPut    = item => new Promise((r, j) => { const q = tx('readwrite').put(i
 let msgs = [];
 
 // Upload flow state
-let ufItems = [];       // [{id, file, imageData, extractedText, detectedSender, confirmedSender, date}]
+let ufItems = [];       // [{id, file, imageData, extractedText, detectedSender, confirmedSender, date, memo}]
 let ufEditingId = null; // item being edited in sender picker
 let ufPickedSender = null; // selection in picker
 let ufOcrDone = false;
+let ufCarouselIndex = 0;
+let ufCarouselTimer = null;
 
 // ═══════════════════ Init ═══════════════════
 let dbAvailable = false;
@@ -1074,7 +1102,7 @@ function onFileSelect(e) {
     id: uid(), file: f,
     imageData: null, extractedText: '',
     detectedSender: null, confirmedSender: null,
-    date: today()
+    date: today(), memo: ''
   }));
   ufOcrDone = false;
 
@@ -1115,8 +1143,10 @@ function loadImage(file) {
 }
 
 function renderProcCards() {
-  document.getElementById('ufProgressLabel').textContent = `1 / ${ufItems.length}장`;
-  document.getElementById('ufProcCards').innerHTML = ufItems.map((item, i) => `
+  ufCarouselIndex = 0;
+  const track = document.getElementById('ufCarouselTrack');
+  track.style.transform = 'translateX(0)';
+  track.innerHTML = ufItems.map((item, i) => `
     <div class="uf-proc-card" id="ufProcCard_${i}">
       ${item.imageData ? `<img src="${item.imageData}" alt="">` : ''}
       <div class="uf-proc-bubbles">
@@ -1124,11 +1154,42 @@ function renderProcCards() {
         <div class="uf-proc-bubble placeholder">분석하고 있어요</div>
       </div>
     </div>`).join('');
+  updateCarouselLabel();
+  startCarouselRotation();
+}
+
+function showCarouselCard(i) {
+  ufCarouselIndex = i;
+  const track = document.getElementById('ufCarouselTrack');
+  if (!track) return;
+  const card = track.querySelector('.uf-proc-card');
+  const cardWidth = card ? card.offsetWidth : track.offsetWidth;
+  track.style.transform = `translateX(-${i * cardWidth}px)`;
+  updateCarouselLabel();
+}
+
+function updateCarouselLabel() {
+  const label = document.getElementById('ufProgressLabel');
+  if (label) label.textContent = `${ufCarouselIndex + 1} / ${ufItems.length}장`;
+}
+
+function startCarouselRotation() {
+  if (ufCarouselTimer) clearInterval(ufCarouselTimer);
+  if (ufItems.length <= 1) return;
+  ufCarouselTimer = setInterval(() => {
+    if (!ufOcrDone) showCarouselCard((ufCarouselIndex + 1) % ufItems.length);
+  }, 2500);
+}
+
+function stopCarouselRotation() {
+  if (ufCarouselTimer) { clearInterval(ufCarouselTimer); ufCarouselTimer = null; }
 }
 
 async function runAllOCR() {
   for (let i = 0; i < ufItems.length; i++) {
     const item = ufItems[i];
+    stopCarouselRotation();
+    showCarouselCard(i);
     try {
       const worker = await Tesseract.createWorker('kor+eng', 1, {
         logger: m => {
@@ -1146,7 +1207,6 @@ async function runAllOCR() {
       item.confirmedSender = item.detectedSender;
 
       // Update card UI
-      const labelEl = document.getElementById(`ufProcLabel_${i}`);
       const bubblesEl = document.getElementById(`ufProcCard_${i}`)?.querySelector('.uf-proc-bubbles');
       if (bubblesEl) {
         const lines = text.split('\n').map(l=>l.trim()).filter(Boolean).slice(0,3);
@@ -1157,11 +1217,17 @@ async function runAllOCR() {
     } catch (err) {
       console.warn('OCR error item', i, err);
     }
-    document.getElementById('ufProgressLabel').textContent = `${i+1} / ${ufItems.length}장`;
+    // Brief pause to show result, then move to next
+    if (i < ufItems.length - 1) {
+      await new Promise(r => setTimeout(r, 800));
+      showCarouselCard(i + 1);
+      await new Promise(r => setTimeout(r, 200));
+    }
   }
 
   document.getElementById('ufBar').style.width = '100%';
   ufOcrDone = true;
+  stopCarouselRotation();
   setTimeout(() => goToConfirm(), 600);
 }
 
@@ -1189,6 +1255,10 @@ function renderConfirmCards() {
   document.getElementById('ufPendingCards').innerHTML = pending.map(item => `
     <div class="uf-pending-card">
       ${item.imageData ? `<img class="uf-pending-img" src="${item.imageData}" alt="">` : ''}
+      <div class="uf-memo-wrap">
+        <textarea class="uf-memo-input" placeholder="OCR이 어려운 경우 메모를 직접 입력해주세요..."
+          oninput="updateMemo('${item.id}', this.value)">${esc(item.memo || '')}</textarea>
+      </div>
       <div class="uf-pending-footer">
         <button class="uf-sender-btn" onclick="openSenderPicker('${item.id}')">
           <svg viewBox="0 0 24 24" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
@@ -1286,6 +1356,11 @@ function closeSenderPicker() {
   showStep('confirm');
 }
 
+function updateMemo(id, text) {
+  const item = ufItems.find(i => i.id === id);
+  if (item) item.memo = text;
+}
+
 // ═══════════════════ Save ═══════════════════
 async function saveAll() {
   if (ufItems.some(i => !i.confirmedSender)) {
@@ -1302,7 +1377,7 @@ async function saveAll() {
         id: uid(),
         sender: item.confirmedSender,
         date: item.date || today(),
-        folder: '기본', memo: '',
+        folder: '기본', memo: item.memo || '',
         imageData: item.imageData,
         extractedText: item.extractedText,
         createdAt: new Date().toISOString(), lastReadAt: null
@@ -1329,9 +1404,11 @@ async function saveAll() {
 }
 
 function cancelUpload() {
+  stopCarouselRotation();
   document.getElementById('uploadFlow').classList.remove('open');
   document.getElementById('fileInput').value = '';
   ufItems = []; ufEditingId = null; ufPickedSender = null; ufOcrDone = false;
+  ufCarouselIndex = 0;
 }
 
 // ═══════════════════ OCR Name Detection ═══════════════════
