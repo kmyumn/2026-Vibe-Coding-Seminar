@@ -63,6 +63,7 @@
     /* ── Screens ── */
     .screen { display: none; min-height: 100vh; padding-bottom: 96px; }
     .screen.active { display: block; }
+    #searchScreen.active { display: flex; flex-direction: column; }
 
     /* ── Header ── */
     .header {
@@ -180,7 +181,7 @@
     }
 
     /* ── Empty ── */
-    .empty { display: flex; flex-direction: column; align-items: center; padding: 24px 24px 32px; gap: 12px; text-align: center; }
+    .empty { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px 24px 32px; gap: 12px; text-align: center; min-height: 50vh; }
     .empty-illust { width: 100%; max-width: 360px; }
     .empty-illust svg { width: 100%; height: auto; display: block; }
     .empty-sub { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
@@ -226,7 +227,8 @@
       padding: 10px 20px 0; display: flex; align-items: flex-start; gap: 4px; justify-content: center;
     }
     .search-hint svg { width: 13px; height: 13px; flex-shrink: 0; margin-top: 2px; stroke: var(--text-muted); }
-    .search-empty-wrap { display: flex; flex-direction: column; align-items: center; padding: 32px; }
+    #searchResult { flex: 1; display: flex; flex-direction: column; }
+    .search-empty-wrap { display: flex; flex-direction: column; align-items: center; padding: 0 32px 32px; flex: 1; justify-content: flex-end; }
     .search-result-label { font-size: 17px; font-weight: 700; padding: 16px 16px 10px; }
     .search-result-label span { color: var(--accent); }
     .search-card {
@@ -461,14 +463,29 @@
     .uf-bar { height: 100%; background: var(--accent); border-radius: 2px; width: 0; transition: width .3s; }
 
     /* ── Carousel ── */
-    .uf-carousel-wrap { overflow: hidden; padding: 0 16px; }
+    .uf-carousel-wrap { overflow: hidden; }
     .uf-carousel-track {
       display: flex;
       width: 100%;
       transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
       will-change: transform;
     }
-    .uf-carousel-track .uf-proc-card { flex: none; width: 100%; margin: 0 0 12px; }
+    /* Carousel cards: no card styling, just a centered thumbnail */
+    .uf-carousel-track .uf-proc-card {
+      flex: none; width: 100%; margin: 0;
+      background: transparent; border-radius: 0; overflow: visible;
+      display: flex; flex-direction: column; align-items: center;
+    }
+    .uf-carousel-track .uf-proc-card img {
+      width: 52%; border-radius: 16px;
+      max-height: 340px; object-fit: cover; display: block;
+      box-shadow: 0 4px 20px rgba(0,0,0,.12);
+    }
+    .uf-carousel-track .uf-proc-bubbles { display: none; }
+    .uf-proc-status {
+      font-size: 12px; color: var(--text-muted);
+      margin-top: 10px; text-align: center;
+    }
 
     /* ── Step 2: Confirm ── */
     .uf-section-label {
@@ -518,7 +535,7 @@
     .uf-date-text { font-size: 13px; color: var(--text-sub); }
 
     /* Memo input for OCR-pending cards */
-    .uf-memo-wrap { padding: 0 16px 12px; }
+    .uf-memo-wrap { padding: 14px 16px 12px; }
     .uf-memo-input {
       width: 100%; box-sizing: border-box;
       border: 1.5px solid var(--border); border-radius: 12px;
@@ -529,6 +546,30 @@
     }
     .uf-memo-input::placeholder { color: var(--text-muted); }
     .uf-memo-input:focus { border-color: var(--accent); }
+
+    /* ── Step 4: Complete ── */
+    .uf-complete-body { padding: 24px 20px 0; }
+    .uf-complete-count {
+      font-size: 28px; font-weight: 700; line-height: 1.35; margin-bottom: 24px;
+    }
+    .uf-complete-count span { color: var(--accent); }
+
+    /* Confetti */
+    #ufConfettiContainer {
+      position: fixed; inset: 0; pointer-events: none; z-index: 201; overflow: hidden;
+    }
+    @keyframes confetti-fall {
+      0%   { transform: translateY(-60px) rotate(0deg); opacity: 1; }
+      80%  { opacity: 1; }
+      100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+    }
+    .confetti-piece {
+      position: absolute; width: 8px; height: 8px; border-radius: 2px;
+      animation: confetti-fall linear forwards;
+    }
+
+    /* Save button disabled */
+    #ufSaveBtn:disabled { opacity: .4; cursor: not-allowed; }
 
     /* ── Step 3: Sender Picker ── */
     .uf-picker-search {
@@ -644,7 +685,7 @@
   </div>
   <div class="search-hint">
     <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-    맞춤법을 틀리거나 정확한 표현이 아니어도 AI가 비슷한 내용을 찾아드려요
+    맞춤법을 틀리거나 정확한 표현이 아니어도<br>AI가 비슷한 내용을 찾아드려요
   </div>
   <div id="searchResult">
     <div class="search-empty-wrap">
@@ -798,7 +839,23 @@
     </div>
 
     <div class="uf-bottom">
-      <button class="btn-primary" id="ufSaveBtn" onclick="saveAll()">저장하기</button>
+      <button class="btn-primary" id="ufSaveBtn" onclick="saveAll()" disabled>보관 완료하기</button>
+    </div>
+  </div>
+
+  <!-- ── Step 4: 보관 완료 ── -->
+  <div id="ufComplete" class="uf-step">
+    <div id="ufConfettiContainer"></div>
+    <div class="uf-header">
+      <div class="back-btn" onclick="cancelUpload()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </div>
+      <div class="uf-header-title">마음 보관</div>
+      <div style="min-width:36px"></div>
+    </div>
+    <div class="uf-complete-body">
+      <div class="uf-complete-count"><span id="ufCompleteCount">0</span>개의 마음이<br>보관되었어요</div>
+      <div id="ufCompleteCards"></div>
     </div>
   </div>
 
@@ -1149,10 +1206,7 @@ function renderProcCards() {
   track.innerHTML = ufItems.map((item, i) => `
     <div class="uf-proc-card" id="ufProcCard_${i}">
       ${item.imageData ? `<img src="${item.imageData}" alt="">` : ''}
-      <div class="uf-proc-bubbles">
-        <div class="uf-proc-sender-label" id="ufProcLabel_${i}">인식 중...</div>
-        <div class="uf-proc-bubble placeholder">분석하고 있어요</div>
-      </div>
+      <div class="uf-proc-status" id="ufProcStatus_${i}">인식 중...</div>
     </div>`).join('');
   updateCarouselLabel();
   startCarouselRotation();
@@ -1206,14 +1260,9 @@ async function runAllOCR() {
       item.detectedSender = detectSenderFromText(text);
       item.confirmedSender = item.detectedSender;
 
-      // Update card UI
-      const bubblesEl = document.getElementById(`ufProcCard_${i}`)?.querySelector('.uf-proc-bubbles');
-      if (bubblesEl) {
-        const lines = text.split('\n').map(l=>l.trim()).filter(Boolean).slice(0,3);
-        bubblesEl.innerHTML = `
-          <div class="uf-proc-sender-label">${item.detectedSender ? esc(item.detectedSender) : '보낸 사람 미확인'}</div>
-          ${lines.map(l => `<div class="uf-proc-bubble">${esc(l.slice(0,45))}</div>`).join('')}`;
-      }
+      // Update status label
+      const statusEl = document.getElementById(`ufProcStatus_${i}`);
+      if (statusEl) statusEl.textContent = item.detectedSender ? esc(item.detectedSender) : '보낸 사람 미확인';
     } catch (err) {
       console.warn('OCR error item', i, err);
     }
@@ -1237,7 +1286,7 @@ function goToConfirm() {
 }
 
 function showStep(name) {
-  ['processing','confirm','senderPicker'].forEach(s => {
+  ['processing','confirm','complete','senderPicker'].forEach(s => {
     const el = document.getElementById('uf' + s.charAt(0).toUpperCase() + s.slice(1));
     el.classList.toggle('active', s === name);
   });
@@ -1251,6 +1300,7 @@ function renderConfirmCards() {
   document.getElementById('ufDoneCount').textContent    = done.length;
   document.getElementById('ufPendingSection').style.display = pending.length ? 'block' : 'none';
   document.getElementById('ufDoneSection').style.display    = done.length    ? 'block' : 'none';
+  document.getElementById('ufSaveBtn').disabled = pending.length > 0;
 
   document.getElementById('ufPendingCards').innerHTML = pending.map(item => `
     <div class="uf-pending-card">
@@ -1369,7 +1419,7 @@ async function saveAll() {
   }
   const btn = document.getElementById('ufSaveBtn');
   btn.disabled = true;
-  btn.textContent = '보관중...';
+  btn.textContent = '보관 중...';
   try {
     for (const item of ufItems) {
       if (!item.imageData) continue;
@@ -1382,14 +1432,12 @@ async function saveAll() {
         extractedText: item.extractedText,
         createdAt: new Date().toISOString(), lastReadAt: null
       };
-      if (dbAvailable) await dbAdd(msg);  // persist; fall through to memory on DB error
+      if (dbAvailable) await dbAdd(msg);
       msgs.unshift(msg);
     }
-    cancelUpload();
     renderHome();
     renderLibrary();
-    const label = dbAvailable ? '개의 마음이 보관되었어요' : '개 저장됨 (이 세션에서만 유지)';
-    showToast(`${ufItems.length}${label}`);
+    showCompleteScreen();
   } catch(e) {
     console.error('saveAll error:', e);
     const reason =
@@ -1397,10 +1445,50 @@ async function saveAll() {
       e?.name === 'SecurityError'      ? '이 환경에서는 저장이 제한되어 있어요. 일반 브라우저 탭에서 열어주세요.' :
       `저장에 실패했어요 (${e?.name ?? '알 수 없는 오류'})`;
     showToast(reason);
-  } finally {
     btn.disabled = false;
-    btn.textContent = '저장하기';
+    btn.textContent = '보관 완료하기';
   }
+}
+
+function showCompleteScreen() {
+  document.getElementById('ufCompleteCount').textContent = ufItems.length;
+  document.getElementById('ufCompleteCards').innerHTML = ufItems.map(item => `
+    <div class="uf-done-card">
+      <div class="uf-done-img-wrap">
+        ${item.imageData ? `<img src="${item.imageData}" alt="">` : ''}
+      </div>
+      <div class="uf-done-footer">
+        <div class="uf-done-senders">
+          <div class="uf-done-sender">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+            ${esc(item.confirmedSender)}
+          </div>
+        </div>
+        <span class="uf-date-text">${item.date}</span>
+      </div>
+    </div>`).join('');
+  showStep('complete');
+  launchConfetti();
+}
+
+function launchConfetti() {
+  const container = document.getElementById('ufConfettiContainer');
+  container.innerHTML = '';
+  const colors = ['#F4A896','#E8C5BE','#A8C4D4','#D4B8E0','#F9E4B7','#B8E4C9'];
+  for (let n = 0; n < 60; n++) {
+    const el = document.createElement('div');
+    el.className = 'confetti-piece';
+    el.style.left = Math.random() * 100 + '%';
+    el.style.top = '-10px';
+    el.style.background = colors[Math.floor(Math.random() * colors.length)];
+    el.style.width = (6 + Math.random() * 8) + 'px';
+    el.style.height = (6 + Math.random() * 8) + 'px';
+    el.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+    el.style.animationDuration = (1.5 + Math.random() * 2) + 's';
+    el.style.animationDelay = (Math.random() * 1.2) + 's';
+    container.appendChild(el);
+  }
+  setTimeout(() => { container.innerHTML = ''; }, 4000);
 }
 
 function cancelUpload() {
