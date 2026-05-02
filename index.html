@@ -104,7 +104,55 @@
       background: var(--text); border: none; cursor: pointer;
       display: flex; align-items: center; justify-content: center; flex-shrink: 0;
       box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+      transition: transform .15s;
     }
+    .nav-add.open { transform: rotate(45deg); }
+    .fab-wrap { position: relative; flex-shrink: 0; }
+    .fab-menu {
+      position: absolute; bottom: 62px; right: 0;
+      background: var(--white); border-radius: 18px;
+      box-shadow: 0 4px 28px rgba(0,0,0,.13);
+      overflow: hidden; min-width: 168px;
+      opacity: 0; transform: translateY(10px) scale(.97);
+      pointer-events: none;
+      transition: opacity .18s, transform .18s;
+    }
+    .fab-menu.open { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
+    .fab-menu-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 15px 18px; width: 100%;
+      border: none; background: none; cursor: pointer;
+      font-family: inherit; font-size: 14px; font-weight: 500;
+      color: var(--text); text-align: left;
+      transition: background .12s;
+    }
+    .fab-menu-item:hover { background: var(--bg); }
+    .fab-menu-item + .fab-menu-item { border-top: 1px solid var(--bg); }
+    .fab-menu-item svg { width: 18px; height: 18px; flex-shrink: 0; stroke: var(--text-sub); }
+    /* Folder Create Sheet */
+    .folder-create-backdrop {
+      display: none; position: fixed; inset: 0; z-index: 300;
+      background: rgba(0,0,0,0);
+      transition: background .25s;
+    }
+    .folder-create-backdrop.open { background: rgba(0,0,0,.35); }
+    .folder-create-sheet {
+      position: fixed; left: 50%; transform: translateX(-50%) translateY(100%);
+      bottom: 0; width: 100%; max-width: 430px;
+      background: var(--white); border-radius: 24px 24px 0 0;
+      padding: 28px 24px 40px; z-index: 301;
+      transition: transform .28s cubic-bezier(.32,1,.25,1);
+    }
+    .folder-create-backdrop.open .folder-create-sheet { transform: translateX(-50%) translateY(0); }
+    .folder-create-title { font-size: 18px; font-weight: 700; margin-bottom: 20px; }
+    .folder-create-input {
+      width: 100%; box-sizing: border-box;
+      border: none; border-radius: 999px;
+      background: var(--bg); padding: 14px 20px;
+      font-family: inherit; font-size: 15px; color: var(--text);
+      outline: none; margin-bottom: 14px;
+    }
+    .folder-create-input::placeholder { color: var(--text-muted); }
     .nav-add:active { opacity: .8; }
     .nav-add svg { width: 22px; height: 22px; }
 
@@ -192,22 +240,38 @@
     .lib-header { padding: 16px 16px 12px; }
     .lib-count { font-size: 24px; font-weight: 700; line-height: 1.35; }
     .lib-count span { color: var(--accent); }
-    .active-folder { background: var(--white); border-radius: var(--radius-lg) var(--radius-lg) var(--radius-lg) 0; margin: 0 16px 12px; padding: 20px; }
-    .folder-label { font-size: 12px; color: var(--text-sub); display: flex; align-items: center; gap: 4px; margin-bottom: 4px; }
-    .folder-label svg { width: 13px; height: 13px; stroke: var(--text-sub); }
+    .active-folder { background: var(--white); border-radius: var(--radius-lg); margin: 0 16px 12px; padding: 20px; position: relative; }
+    .active-folder-delete {
+      position: absolute; top: 12px; right: 12px;
+      background: rgba(30,30,30,.82); color: white;
+      border: none; border-radius: 999px;
+      padding: 6px 14px; font-family: inherit; font-size: 13px; font-weight: 600;
+      cursor: pointer; display: none; z-index: 10; backdrop-filter: blur(4px);
+    }
+    .active-folder.long-pressed .active-folder-delete { display: block; }
+    .folder-label { font-size: 12px; color: var(--text-sub); display: inline-flex; align-items: center; gap: 4px; margin-bottom: 8px; background: #F7F7F7; border-radius: 999px; padding: 4px 10px; }
+    .folder-label svg { width: 13px; height: 13px; stroke: var(--text-sub); flex-shrink: 0; }
     .folder-name { font-size: 16px; font-weight: 700; margin-bottom: 12px; }
     .folder-big-count { font-size: 34px; font-weight: 700; text-align: center; margin: 12px 0 18px; }
     .folder-big-count span { font-size: 15px; font-weight: 400; color: var(--text-sub); }
     .folder-actions { display: flex; gap: 10px; }
     .folder-item {
-      background: var(--white); border-radius: var(--radius-lg) var(--radius-lg) var(--radius-lg) 0;
-      margin: 0 16px 10px; padding: 18px 20px;
+      background: #F7F7F7; border-radius: 999px;
+      margin: 0 16px 10px; padding: 14px 22px;
       display: flex; justify-content: space-between; align-items: center;
-      cursor: pointer; transition: opacity .15s;
+      cursor: pointer; transition: opacity .15s; position: relative;
     }
     .folder-item:active { opacity: .8; }
     .folder-item-name { font-size: 15px; font-weight: 500; }
     .folder-item-count { font-size: 14px; color: var(--text-sub); }
+    .folder-item-delete {
+      position: absolute; top: 50%; right: 14px; transform: translateY(-50%);
+      background: rgba(30,30,30,.82); color: white;
+      border: none; border-radius: 999px;
+      padding: 5px 12px; font-family: inherit; font-size: 12px; font-weight: 600;
+      cursor: pointer; display: none; z-index: 10; backdrop-filter: blur(4px);
+    }
+    .folder-item.long-pressed .folder-item-delete { display: block; }
 
     /* ── Search ── */
     .search-wrap { padding: 8px 16px 0; }
@@ -389,9 +453,17 @@
     .fd-msg-card {
       background: var(--white); border-radius: var(--radius-lg) var(--radius-lg) var(--radius-lg) 0;
       margin: 0 16px 10px; overflow: hidden;
-      cursor: pointer; transition: opacity .15s;
+      cursor: pointer; transition: opacity .15s; position: relative;
     }
     .fd-msg-card:active { opacity: .85; }
+    .fd-msg-card-delete {
+      position: absolute; top: 10px; right: 10px;
+      background: rgba(30,30,30,.82); color: white;
+      border: none; border-radius: 999px;
+      padding: 6px 14px; font-family: inherit; font-size: 13px; font-weight: 600;
+      cursor: pointer; display: none; z-index: 10; backdrop-filter: blur(4px);
+    }
+    .fd-msg-card.long-pressed .fd-msg-card-delete { display: block; }
     .fd-msg-img { width: 100%; display: block; object-fit: cover; max-height: 280px; }
     .fd-msg-ph {
       height: 160px; background: var(--bubble);
@@ -678,7 +750,7 @@
   <div class="hero-card" onclick="openUpload()">
     <div class="hero-title">간직하고 싶은<br>메시지가 있나요?</div>
     <div class="hero-sub">지금, POOM에 보관하세요</div>
-    <div class="hero-arrow"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><polyline points="9 18 15 12 9 6"/></svg></div>
+    <div class="hero-arrow"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M10.2739 5L15.6478 10.8217C16.0014 11.2048 16.0014 11.7952 15.6478 12.1783L10.2739 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
   </div>
   <div class="section-title">최근 받은 마음</div>
   <div id="homeRecent"></div>
@@ -770,16 +842,38 @@
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15.4425 14.4022L20 19M16.8 10.4565C16.8 14.0224 13.9346 16.9131 10.4 16.9131C6.86537 16.9131 4 14.0224 4 10.4565C4 6.89069 6.86537 4 10.4 4C13.9346 4 16.8 6.89069 16.8 10.4565Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>찾기
     </button>
   </div>
-  <button class="nav-add" onclick="openUpload()">
-    <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-  </button>
+  <div class="fab-wrap">
+    <div class="fab-menu" id="fabMenu">
+      <button class="fab-menu-item" onclick="closeFabMenu(); openFolderCreate()">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+        폴더 만들기
+      </button>
+      <button class="fab-menu-item" onclick="closeFabMenu(); openUpload()">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        마음 보관하기
+      </button>
+    </div>
+    <button class="nav-add" id="fabBtn" onclick="toggleFabMenu()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    </button>
+  </div>
 </nav>
+
+<!-- Folder Create Sheet -->
+<div class="folder-create-backdrop" id="folderCreateBackdrop" onclick="closeFolderCreate()">
+  <div class="folder-create-sheet" onclick="event.stopPropagation()">
+    <div class="folder-create-title">새 폴더 이름</div>
+    <input class="folder-create-input" id="folderCreateInput" type="text" placeholder="예) 2024년 마음 모음" maxlength="30"
+      onkeydown="if(event.key==='Enter') confirmFolderCreate()">
+    <button class="btn-primary" style="width:100%" onclick="confirmFolderCreate()">만들기</button>
+  </div>
+</div>
 
 <!-- ════════════════════ MESSAGE DETAIL ════════════════════ -->
 <div class="detail-screen" id="detailScreen">
   <div class="detail-header">
     <div class="back-btn" onclick="closeDetail()">
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><polyline points="15 18 9 12 15 6"/></svg>
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M14.2739 5L8.89997 10.8217C8.54637 11.2048 8.54637 11.7952 8.89997 12.1783L14.2739 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
     </div>
     <div class="detail-header-title">받은 마음</div>
     <div class="detail-header-right">
@@ -799,7 +893,7 @@
 <div class="detail-screen" id="folderDetailScreen">
   <div class="detail-header">
     <div class="back-btn" onclick="closeFolderDetail()">
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><polyline points="15 18 9 12 15 6"/></svg>
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M14.2739 5L8.89997 10.8217C8.54637 11.2048 8.54637 11.7952 8.89997 12.1783L14.2739 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
     </div>
     <div class="detail-header-title" id="folderDetailTitle"></div>
   </div>
@@ -808,7 +902,7 @@
     <input type="text" id="fdSearchInput" placeholder="내용/보낸사람으로 검색" oninput="fdQuery=this.value; renderFolderDetail()">
   </div>
   <div class="fd-sort-row">
-    <button class="fd-sort-btn">최신순 <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
+    <button class="fd-sort-btn">최신순 <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M5 9.5L10.8217 14.8739C11.2048 15.2275 11.7952 15.2275 12.1783 14.8739L18 9.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
   </div>
   <div id="folderDetailBody"></div>
 </div>
@@ -821,7 +915,7 @@
   <div id="ufProcessing" class="uf-step active">
     <div class="uf-header">
       <div class="back-btn" onclick="cancelUpload()">
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><polyline points="15 18 9 12 15 6"/></svg>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M14.2739 5L8.89997 10.8217C8.54637 11.2048 8.54637 11.7952 8.89997 12.1783L14.2739 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
       </div>
       <div class="uf-header-title">마음 보관</div>
       <div style="min-width:36px"></div>
@@ -846,7 +940,7 @@
   <div id="ufConfirm" class="uf-step">
     <div class="uf-header">
       <div class="back-btn" onclick="showStep('processing')">
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><polyline points="15 18 9 12 15 6"/></svg>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M14.2739 5L8.89997 10.8217C8.54637 11.2048 8.54637 11.7952 8.89997 12.1783L14.2739 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
       </div>
       <div class="uf-header-title">마음 보관</div>
       <div style="min-width:36px"></div>
@@ -890,7 +984,7 @@
   <div id="ufSenderPicker" class="uf-step">
     <div class="uf-header">
       <div class="back-btn" onclick="closeSenderPicker()">
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><polyline points="15 18 9 12 15 6"/></svg>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M14.2739 5L8.89997 10.8217C8.54637 11.2048 8.54637 11.7952 8.89997 12.1783L14.2739 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
       </div>
       <div class="uf-header-title">보낸 사람 검색</div>
       <button class="uf-header-action" onclick="confirmSenderPicker()">완료</button>
@@ -992,6 +1086,61 @@ async function init() {
   renderLibrary();
 }
 
+// ═══════════════════ FAB Menu ═══════════════════
+let customFolders = JSON.parse(localStorage.getItem('poom_custom_folders') || '[]');
+
+function toggleFabMenu() {
+  const menu = document.getElementById('fabMenu');
+  const btn  = document.getElementById('fabBtn');
+  const isOpen = menu.classList.contains('open');
+  if (isOpen) {
+    menu.classList.remove('open');
+    btn.classList.remove('open');
+  } else {
+    menu.offsetHeight; // force reflow so CSS transition fires from opacity:0
+    menu.classList.add('open');
+    btn.classList.add('open');
+  }
+}
+
+function closeFabMenu() {
+  document.getElementById('fabMenu').classList.remove('open');
+  document.getElementById('fabBtn').classList.remove('open');
+}
+
+// Close FAB menu on outside click
+document.addEventListener('click', function(e) {
+  const wrap = e.target.closest('.fab-wrap');
+  if (!wrap) closeFabMenu();
+});
+
+function openFolderCreate() {
+  document.getElementById('folderCreateInput').value = '';
+  const bd = document.getElementById('folderCreateBackdrop');
+  bd.style.display = 'block';
+  bd.offsetHeight; // force reflow so CSS transition fires
+  bd.classList.add('open');
+  setTimeout(() => document.getElementById('folderCreateInput').focus(), 300);
+}
+
+function closeFolderCreate() {
+  const bd = document.getElementById('folderCreateBackdrop');
+  bd.classList.remove('open');
+  setTimeout(() => { bd.style.display = 'none'; }, 280);
+}
+
+function confirmFolderCreate() {
+  const name = document.getElementById('folderCreateInput').value.trim();
+  if (!name) { showToast('폴더 이름을 입력해 주세요'); return; }
+  if (name === '기본') { showToast('"기본" 폴더는 이미 있어요'); return; }
+  if (customFolders.includes(name)) { showToast('이미 있는 폴더 이름이에요'); return; }
+  customFolders.push(name);
+  localStorage.setItem('poom_custom_folders', JSON.stringify(customFolders));
+  closeFolderCreate();
+  renderLibrary();
+  showToast(`'${name}' 폴더가 만들어졌어요`);
+}
+
 function today() { return new Date().toISOString().slice(0, 10); }
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
 function esc(s) {
@@ -1088,6 +1237,86 @@ function deleteMsg(e, id) {
   showToast('마음을 지웠어요');
 }
 
+// ── Folder long-press ──
+let _flpTimer = null;
+let _flpActive = false;
+
+function startFolderLongPress(e, elId) {
+  _flpActive = false;
+  _flpTimer = setTimeout(() => {
+    _flpActive = true;
+    const el = document.getElementById(elId);
+    if (el) el.classList.add('long-pressed');
+  }, 600);
+}
+function endFolderLongPress() { clearTimeout(_flpTimer); }
+function triggerFolderLongPress(e, elId) {
+  e.preventDefault();
+  _flpActive = true;
+  const el = document.getElementById(elId);
+  if (el) el.classList.add('long-pressed');
+}
+function onFolderItemClick(e, elId, name) {
+  if (_flpActive) { _flpActive = false; return; }
+  const el = document.getElementById(elId);
+  if (el && el.classList.contains('long-pressed')) {
+    el.classList.remove('long-pressed'); return;
+  }
+  openFolderDetail(name);
+}
+function deleteFolder(e, name) {
+  e.stopPropagation();
+  const toDelete = msgs.filter(m => (m.folder||'기본') === name);
+  const count = toDelete.length;
+  if (dbAvailable) {
+    toDelete.forEach(m => { try { tx('readwrite').delete(m.id); } catch(_) {} });
+  }
+  msgs = msgs.filter(m => (m.folder||'기본') !== name);
+  // also remove from customFolders if present
+  const ci = customFolders.indexOf(name);
+  if (ci !== -1) { customFolders.splice(ci, 1); localStorage.setItem('poom_custom_folders', JSON.stringify(customFolders)); }
+  renderHome();
+  renderLibrary();
+  showToast(count ? `${count}개의 마음을 지웠어요` : `'${name}' 폴더를 지웠어요`);
+}
+
+// ── fd-msg-card long-press ──
+let _fdlpTimer = null;
+let _fdlpActive = false;
+
+function startFdLongPress(e, id) {
+  _fdlpActive = false;
+  _fdlpTimer = setTimeout(() => {
+    _fdlpActive = true;
+    const card = document.getElementById('fdcard-' + id);
+    if (card) card.classList.add('long-pressed');
+  }, 600);
+}
+function endFdLongPress() { clearTimeout(_fdlpTimer); }
+function triggerFdLongPress(e, id) {
+  e.preventDefault();
+  _fdlpActive = true;
+  const card = document.getElementById('fdcard-' + id);
+  if (card) card.classList.add('long-pressed');
+}
+function onFdCardClick(e, id) {
+  if (_fdlpActive) { _fdlpActive = false; return; }
+  const card = document.getElementById('fdcard-' + id);
+  if (card && card.classList.contains('long-pressed')) {
+    card.classList.remove('long-pressed'); return;
+  }
+  openDetail(id);
+}
+function deleteFdMsg(e, id) {
+  e.stopPropagation();
+  msgs = msgs.filter(m => m.id !== id);
+  if (dbAvailable) { try { tx('readwrite').delete(id); } catch(_) {} }
+  renderHome();
+  renderLibrary();
+  renderFolderDetail();
+  showToast('마음을 지웠어요');
+}
+
 function emptyState(text) {
   return `<div class="empty">
     <div class="empty-illust"><svg width="360" height="184" viewBox="0 0 360 184" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -1178,24 +1407,43 @@ function renderLibrary() {
   document.getElementById('libCount').innerHTML = `<span>${msgs.length}개</span>의 마음이<br>보관되어있어요`;
   const byFolder = {};
   msgs.forEach(m => { const f = m.folder||'기본'; (byFolder[f]=byFolder[f]||[]).push(m); });
-  const entries = Object.entries(byFolder);
+  // '기본' 폴더는 항상 존재 (삭제 불가)
+  if (!byFolder['기본']) byFolder['기본'] = [];
+
   const el = document.getElementById('folderList');
-  if (!entries.length) { el.innerHTML = emptyState('아직 보관된 마음이 없어요'); return; }
-  const [[fname, fmsgs], ...rest] = entries;
+  const defaultMsgs = byFolder['기본'];
+
+  // '기본' 폴더: 항상 상단 고정, 지우기 버튼 없음
   let html = `
-    <div class="active-folder">
+    <div class="active-folder" id="af-main">
       <div class="folder-label">
         <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>기본 폴더
       </div>
-      <div class="folder-name">${esc(fname)}</div>
-      <div class="folder-big-count">${fmsgs.length} <span>개</span></div>
+      <div class="folder-name">기본</div>
+      <div class="folder-big-count">${defaultMsgs.length} <span>개</span></div>
       <div class="folder-actions">
-        <button class="btn-outline" onclick="openFolderDetail('${esc(fname)}')">분석</button>
-        <button class="btn-fill"    onclick="openFolderDetail('${esc(fname)}')">편집</button>
+        <button class="btn-outline" onclick="openFolderDetail('기본')">분석</button>
+        <button class="btn-fill"    onclick="openFolderDetail('기본')">편집</button>
       </div>
     </div>`;
-  rest.forEach(([n, ms]) => {
-    html += `<div class="folder-item" onclick="openFolderDetail('${esc(n)}')"><div class="folder-item-name">${esc(n)}</div><div class="folder-item-count">${ms.length} 개</div></div>`;
+
+  // '기본' 제외한 메시지 기반 폴더
+  const otherEntries = Object.entries(byFolder).filter(([n]) => n !== '기본');
+  // 사용자가 만든 빈 폴더도 추가
+  customFolders.forEach(n => { if (!byFolder[n]) otherEntries.push([n, []]); });
+
+  otherEntries.forEach(([n, ms], idx) => {
+    const fiId = `fi-${idx}`;
+    html += `<div class="folder-item" id="${fiId}"
+      onclick="onFolderItemClick(event,'${fiId}','${esc(n)}')"
+      ontouchstart="startFolderLongPress(event,'${fiId}')"
+      ontouchend="endFolderLongPress()"
+      ontouchmove="endFolderLongPress()"
+      oncontextmenu="triggerFolderLongPress(event,'${fiId}')">
+      <button class="folder-item-delete" onclick="deleteFolder(event,'${esc(n)}')">지우기</button>
+      <div class="folder-item-name">${esc(n)}</div>
+      <div class="folder-item-count">${ms.length} 개</div>
+    </div>`;
   });
   el.innerHTML = html;
 }
@@ -1789,7 +2037,13 @@ function renderFolderDetail() {
   body.innerHTML = Object.entries(byMonth).map(([month, items]) => `
     <div class="fd-month-header">${month}</div>
     ${items.map(m => `
-      <div class="fd-msg-card" onclick="openDetail('${m.id}')">
+      <div class="fd-msg-card" id="fdcard-${m.id}"
+        onclick="onFdCardClick(event,'${m.id}')"
+        ontouchstart="startFdLongPress(event,'${m.id}')"
+        ontouchend="endFdLongPress()"
+        ontouchmove="endFdLongPress()"
+        oncontextmenu="triggerFdLongPress(event,'${m.id}')">
+        <button class="fd-msg-card-delete" onclick="deleteFdMsg(event,'${m.id}')">지우기</button>
         ${m.imageData
           ? `<img class="fd-msg-img" src="${m.imageData}" alt="">`
           : `<div class="fd-msg-ph"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>`}
