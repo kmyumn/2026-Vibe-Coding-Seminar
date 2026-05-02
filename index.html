@@ -1132,6 +1132,7 @@ function closeFolderCreate() {
 function confirmFolderCreate() {
   const name = document.getElementById('folderCreateInput').value.trim();
   if (!name) { showToast('폴더 이름을 입력해 주세요'); return; }
+  if (name === '기본') { showToast('"기본" 폴더는 이미 있어요'); return; }
   if (customFolders.includes(name)) { showToast('이미 있는 폴더 이름이에요'); return; }
   customFolders.push(name);
   localStorage.setItem('poom_custom_folders', JSON.stringify(customFolders));
@@ -1406,34 +1407,32 @@ function renderLibrary() {
   document.getElementById('libCount').innerHTML = `<span>${msgs.length}개</span>의 마음이<br>보관되어있어요`;
   const byFolder = {};
   msgs.forEach(m => { const f = m.folder||'기본'; (byFolder[f]=byFolder[f]||[]).push(m); });
-  const entries = Object.entries(byFolder);
+  // '기본' 폴더는 항상 존재 (삭제 불가)
+  if (!byFolder['기본']) byFolder['기본'] = [];
+
   const el = document.getElementById('folderList');
-  if (!entries.length) { el.innerHTML = emptyState('아직 보관된 마음이 없어요'); return; }
-  const [[fname, fmsgs], ...rest] = entries;
+  const defaultMsgs = byFolder['기본'];
+
+  // '기본' 폴더: 항상 상단 고정, 지우기 버튼 없음
   let html = `
-    <div class="active-folder" id="af-main"
-      ontouchstart="startFolderLongPress(event,'af-main')"
-      ontouchend="endFolderLongPress()"
-      ontouchmove="endFolderLongPress()"
-      oncontextmenu="triggerFolderLongPress(event,'af-main')">
-      <button class="active-folder-delete" onclick="deleteFolder(event,'${esc(fname)}')">지우기</button>
+    <div class="active-folder" id="af-main">
       <div class="folder-label">
         <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>기본 폴더
       </div>
-      <div class="folder-name">${esc(fname)}</div>
-      <div class="folder-big-count">${fmsgs.length} <span>개</span></div>
+      <div class="folder-name">기본</div>
+      <div class="folder-big-count">${defaultMsgs.length} <span>개</span></div>
       <div class="folder-actions">
-        <button class="btn-outline" onclick="openFolderDetail('${esc(fname)}')">분석</button>
-        <button class="btn-fill"    onclick="openFolderDetail('${esc(fname)}')">편집</button>
+        <button class="btn-outline" onclick="openFolderDetail('기본')">분석</button>
+        <button class="btn-fill"    onclick="openFolderDetail('기본')">편집</button>
       </div>
     </div>`;
-  // merge message-derived folders + custom empty folders
-  const allRest = [...rest];
-  customFolders.forEach(n => {
-    if (!byFolder[n]) allRest.push([n, []]);
-  });
 
-  allRest.forEach(([n, ms], idx) => {
+  // '기본' 제외한 메시지 기반 폴더
+  const otherEntries = Object.entries(byFolder).filter(([n]) => n !== '기본');
+  // 사용자가 만든 빈 폴더도 추가
+  customFolders.forEach(n => { if (!byFolder[n]) otherEntries.push([n, []]); });
+
+  otherEntries.forEach(([n, ms], idx) => {
     const fiId = `fi-${idx}`;
     html += `<div class="folder-item" id="${fiId}"
       onclick="onFolderItemClick(event,'${fiId}','${esc(n)}')"
