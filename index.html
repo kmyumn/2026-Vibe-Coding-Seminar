@@ -249,8 +249,8 @@
       cursor: pointer; display: none; z-index: 10; backdrop-filter: blur(4px);
     }
     .active-folder.long-pressed .active-folder-delete { display: block; }
-    .folder-label { font-size: 12px; color: var(--text-sub); display: flex; align-items: center; gap: 4px; margin-bottom: 4px; }
-    .folder-label svg { width: 13px; height: 13px; stroke: var(--text-sub); }
+    .folder-label { font-size: 12px; color: var(--text-sub); display: inline-flex; align-items: center; gap: 4px; margin-bottom: 8px; background: #F7F7F7; border-radius: 999px; padding: 4px 10px; }
+    .folder-label svg { width: 13px; height: 13px; stroke: var(--text-sub); flex-shrink: 0; }
     .folder-name { font-size: 16px; font-weight: 700; margin-bottom: 12px; }
     .folder-big-count { font-size: 34px; font-weight: 700; text-align: center; margin: 12px 0 18px; }
     .folder-big-count span { font-size: 15px; font-weight: 400; color: var(--text-sub); }
@@ -750,7 +750,7 @@
   <div class="hero-card" onclick="openUpload()">
     <div class="hero-title">간직하고 싶은<br>메시지가 있나요?</div>
     <div class="hero-sub">지금, POOM에 보관하세요</div>
-    <div class="hero-arrow"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><polyline points="9 18 15 12 9 6"/></svg></div>
+    <div class="hero-arrow"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M10.2739 5L15.6478 10.8217C16.0014 11.2048 16.0014 11.7952 15.6478 12.1783L10.2739 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
   </div>
   <div class="section-title">최근 받은 마음</div>
   <div id="homeRecent"></div>
@@ -873,7 +873,7 @@
 <div class="detail-screen" id="detailScreen">
   <div class="detail-header">
     <div class="back-btn" onclick="closeDetail()">
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><polyline points="15 18 9 12 15 6"/></svg>
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M14.2739 5L8.89997 10.8217C8.54637 11.2048 8.54637 11.7952 8.89997 12.1783L14.2739 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
     </div>
     <div class="detail-header-title">받은 마음</div>
     <div class="detail-header-right">
@@ -893,7 +893,7 @@
 <div class="detail-screen" id="folderDetailScreen">
   <div class="detail-header">
     <div class="back-btn" onclick="closeFolderDetail()">
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><polyline points="15 18 9 12 15 6"/></svg>
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M14.2739 5L8.89997 10.8217C8.54637 11.2048 8.54637 11.7952 8.89997 12.1783L14.2739 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
     </div>
     <div class="detail-header-title" id="folderDetailTitle"></div>
   </div>
@@ -902,7 +902,7 @@
     <input type="text" id="fdSearchInput" placeholder="내용/보낸사람으로 검색" oninput="fdQuery=this.value; renderFolderDetail()">
   </div>
   <div class="fd-sort-row">
-    <button class="fd-sort-btn">최신순 <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
+    <button class="fd-sort-btn">최신순 <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M5 9.5L10.8217 14.8739C11.2048 15.2275 11.7952 15.2275 12.1783 14.8739L18 9.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
   </div>
   <div id="folderDetailBody"></div>
 </div>
@@ -915,7 +915,7 @@
   <div id="ufProcessing" class="uf-step active">
     <div class="uf-header">
       <div class="back-btn" onclick="cancelUpload()">
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><polyline points="15 18 9 12 15 6"/></svg>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M14.2739 5L8.89997 10.8217C8.54637 11.2048 8.54637 11.7952 8.89997 12.1783L14.2739 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
       </div>
       <div class="uf-header-title">마음 보관</div>
       <div style="min-width:36px"></div>
@@ -940,7 +940,7 @@
   <div id="ufConfirm" class="uf-step">
     <div class="uf-header">
       <div class="back-btn" onclick="showStep('processing')">
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><polyline points="15 18 9 12 15 6"/></svg>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M14.2739 5L8.89997 10.8217C8.54637 11.2048 8.54637 11.7952 8.89997 12.1783L14.2739 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
       </div>
       <div class="uf-header-title">마음 보관</div>
       <div style="min-width:36px"></div>
@@ -984,7 +984,7 @@
   <div id="ufSenderPicker" class="uf-step">
     <div class="uf-header">
       <div class="back-btn" onclick="closeSenderPicker()">
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><polyline points="15 18 9 12 15 6"/></svg>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M14.2739 5L8.89997 10.8217C8.54637 11.2048 8.54637 11.7952 8.89997 12.1783L14.2739 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
       </div>
       <div class="uf-header-title">보낸 사람 검색</div>
       <button class="uf-header-action" onclick="confirmSenderPicker()">완료</button>
