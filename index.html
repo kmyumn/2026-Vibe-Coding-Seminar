@@ -525,14 +525,18 @@
     .uf-done-footer {
       padding: 12px 16px; display: flex; justify-content: space-between; align-items: center;
     }
-    .uf-done-senders { display: flex; gap: 14px; flex-wrap: wrap; }
-    .uf-done-sender {
-      display: flex; align-items: center; gap: 5px;
-      font-size: 13px; color: var(--text-sub); cursor: pointer;
-    }
-    .uf-done-sender svg { width: 13px; height: 13px; stroke: var(--text-sub); }
+    .uf-done-senders { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 
-    .uf-date-text { font-size: 13px; color: var(--text-sub); }
+    .uf-chip {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: #FBF7F4; border-radius: 999px; padding: 6px 14px;
+      font-size: 13px; color: var(--text-sub); border: none;
+      font-family: inherit; cursor: pointer; white-space: nowrap;
+    }
+    .uf-chip svg { width: 13px; height: 13px; stroke: var(--text-sub); fill: none; }
+    .uf-chip-accent { background: var(--accent); color: white; }
+    .uf-chip-accent svg { stroke: white; }
+    .uf-chip-count { display: inline-flex; align-items: center; background: #FBF7F4; border-radius: 999px; padding: 6px 10px; font-size: 12px; color: var(--text-muted); }
 
     /* Memo input for OCR-pending cards */
     .uf-memo-wrap { padding: 14px 16px 12px; }
@@ -556,7 +560,7 @@
 
     /* Confetti */
     #ufConfettiContainer {
-      position: fixed; inset: 0; pointer-events: none; z-index: 201; overflow: hidden;
+      position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden;
     }
     @keyframes confetti-fall {
       0%   { transform: translateY(-60px) rotate(0deg); opacity: 1; }
@@ -567,6 +571,29 @@
       position: absolute; width: 8px; height: 8px; border-radius: 2px;
       animation: confetti-fall linear forwards;
     }
+
+    /* Date picker sheet */
+    .uf-date-picker-sheet {
+      display: none; position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+      width: 100%; max-width: 430px;
+      background: var(--white); border-radius: 24px 24px 0 0;
+      padding: 24px 20px 40px; z-index: 210; box-shadow: 0 -4px 24px rgba(0,0,0,.1);
+    }
+    .uf-date-picker-sheet.open { display: block; }
+    .uf-date-picker-title { font-size: 16px; font-weight: 700; text-align: center; margin-bottom: 24px; }
+    .uf-date-picker-cols { display: flex; justify-content: center; gap: 16px; margin-bottom: 28px; }
+    .uf-date-picker-col { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+    .uf-date-picker-col span { font-size: 22px; font-weight: 600; min-width: 60px; text-align: center; }
+    .uf-date-picker-col button {
+      background: #FBF7F4; border: none; border-radius: 999px;
+      width: 36px; height: 36px; font-size: 16px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .uf-date-picker-label { font-size: 11px; color: var(--text-muted); }
+
+    /* ufComplete position context */
+    #ufComplete { position: relative; }
+    #ufComplete .uf-header, #ufComplete .uf-complete-body { position: relative; z-index: 1; }
 
     /* Save button disabled */
     #ufSaveBtn:disabled { opacity: .4; cursor: not-allowed; }
@@ -879,6 +906,31 @@
       <button class="uf-new-sender-btn" onclick="addAndSelect()">추가</button>
     </div>
   </div>
+
+  <div id="ufDatePicker" class="uf-date-picker-sheet">
+    <div class="uf-date-picker-title">날짜 선택</div>
+    <div class="uf-date-picker-cols">
+      <div class="uf-date-picker-col">
+        <button onclick="adjustDate('y',-1)">▲</button>
+        <span id="dpYear">2023</span>
+        <button onclick="adjustDate('y',1)">▼</button>
+        <span class="uf-date-picker-label">년</span>
+      </div>
+      <div class="uf-date-picker-col">
+        <button onclick="adjustDate('m',-1)">▲</button>
+        <span id="dpMonth">11</span>
+        <button onclick="adjustDate('m',1)">▼</button>
+        <span class="uf-date-picker-label">월</span>
+      </div>
+      <div class="uf-date-picker-col">
+        <button onclick="adjustDate('d',-1)">▲</button>
+        <span id="dpDay">08</span>
+        <button onclick="adjustDate('d',1)">▼</button>
+        <span class="uf-date-picker-label">일</span>
+      </div>
+    </div>
+    <button class="btn-primary" onclick="applyDate()">확인</button>
+  </div>
 </div>
 
 <!-- Toast -->
@@ -915,9 +967,9 @@ const dbPut    = item => new Promise((r, j) => { const q = tx('readwrite').put(i
 let msgs = [];
 
 // Upload flow state
-let ufItems = [];       // [{id, file, imageData, extractedText, detectedSender, confirmedSender, date, memo}]
+let ufItems = [];       // [{id, file, imageData, extractedText, detectedSender, confirmedSenders, date, memo}]
 let ufEditingId = null; // item being edited in sender picker
-let ufPickedSender = null; // selection in picker
+let ufPickedSenders = new Set(); // selections in picker
 let ufOcrDone = false;
 let ufCarouselIndex = 0;
 let ufCarouselTimer = null;
@@ -1158,7 +1210,7 @@ function onFileSelect(e) {
   ufItems = files.map(f => ({
     id: uid(), file: f,
     imageData: null, extractedText: '',
-    detectedSender: null, confirmedSender: null,
+    detectedSender: null, confirmedSenders: [],
     date: today(), memo: ''
   }));
   ufOcrDone = false;
@@ -1258,7 +1310,7 @@ async function runAllOCR() {
 
       item.extractedText = text;
       item.detectedSender = detectSenderFromText(text);
-      item.confirmedSender = item.detectedSender;
+      item.confirmedSenders = item.detectedSender ? [item.detectedSender] : [];
 
       // Update status label
       const statusEl = document.getElementById(`ufProcStatus_${i}`);
@@ -1292,9 +1344,19 @@ function showStep(name) {
   });
 }
 
+function renderSenderChips(senders, itemId) {
+  const clickAttr = `onclick="openSenderPicker('${itemId}')"`;
+  if (!senders || !senders.length) {
+    return `<button class="uf-chip uf-chip-accent" ${clickAttr}><svg viewBox="0 0 24 24" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>보낸 사람</button>`;
+  }
+  const visible = senders.slice(0, 2).map(s => `<button class="uf-chip" ${clickAttr}>${esc(s)}</button>`).join('');
+  const extra = senders.length > 2 ? `<span class="uf-chip-count">+${senders.length - 2}</span>` : '';
+  return visible + extra;
+}
+
 function renderConfirmCards() {
-  const pending = ufItems.filter(i => !i.confirmedSender);
-  const done    = ufItems.filter(i => i.confirmedSender);
+  const pending = ufItems.filter(i => !i.confirmedSenders?.length);
+  const done    = ufItems.filter(i => i.confirmedSenders?.length);
 
   document.getElementById('ufPendingCount').textContent = pending.length;
   document.getElementById('ufDoneCount').textContent    = done.length;
@@ -1310,11 +1372,8 @@ function renderConfirmCards() {
           oninput="updateMemo('${item.id}', this.value)">${esc(item.memo || '')}</textarea>
       </div>
       <div class="uf-pending-footer">
-        <button class="uf-sender-btn" onclick="openSenderPicker('${item.id}')">
-          <svg viewBox="0 0 24 24" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-          보낸 사람
-        </button>
-        <span class="uf-date-text">${item.date}</span>
+        ${renderSenderChips(item.confirmedSenders, item.id)}
+        <button class="uf-chip" onclick="openDatePicker('${item.id}')">${item.date}</button>
       </div>
     </div>`).join('');
 
@@ -1325,12 +1384,9 @@ function renderConfirmCards() {
       </div>
       <div class="uf-done-footer">
         <div class="uf-done-senders">
-          <div class="uf-done-sender" onclick="openSenderPicker('${item.id}')">
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-            ${esc(item.confirmedSender)}
-          </div>
+          ${renderSenderChips(item.confirmedSenders, item.id)}
         </div>
-        <span class="uf-date-text">${item.date}</span>
+        <button class="uf-chip" onclick="openDatePicker('${item.id}')">${item.date}</button>
       </div>
     </div>`).join('');
 }
@@ -1338,7 +1394,8 @@ function renderConfirmCards() {
 // ═══════════════════ Sender Picker ═══════════════════
 function openSenderPicker(itemId) {
   ufEditingId = itemId;
-  ufPickedSender = ufItems.find(i => i.id === itemId)?.confirmedSender || null;
+  const item = ufItems.find(i => i.id === itemId);
+  ufPickedSenders = new Set(item?.confirmedSenders || []);
   document.getElementById('senderPickerInput').value = '';
   document.getElementById('newSenderInput').value = '';
   showStep('senderPicker');
@@ -1358,7 +1415,7 @@ function renderSenderList(list) {
       <div class="uf-drag-dots">
         <span></span><span></span><span></span><span></span><span></span><span></span>
       </div>
-      <div class="uf-name-chip ${ufPickedSender === s ? 'sel' : ''}">${esc(s)}</div>
+      <div class="uf-name-chip ${ufPickedSenders.has(s) ? 'sel' : ''}">${esc(s)}</div>
       <div class="uf-row-dots">···</div>
     </div>`).join('');
 }
@@ -1369,7 +1426,11 @@ function filterSenderList(q) {
 }
 
 function pickSender(name) {
-  ufPickedSender = name;
+  if (ufPickedSenders.has(name)) {
+    ufPickedSenders.delete(name);
+  } else {
+    ufPickedSenders.add(name);
+  }
   renderSenderList(knownSenders().filter(s => {
     const q = document.getElementById('senderPickerInput').value;
     return !q || s.includes(q);
@@ -1378,31 +1439,32 @@ function pickSender(name) {
 
 function confirmSenderPicker() {
   const manualVal = document.getElementById('newSenderInput').value.trim();
-  const chosen = ufPickedSender || manualVal;
-  if (!chosen) { showToast('보낸 사람을 선택하거나 입력해주세요'); return; }
-  applySender(chosen);
+  if (manualVal) ufPickedSenders.add(manualVal);
+  if (!ufPickedSenders.size) { showToast('보낸 사람을 선택하거나 입력해주세요'); return; }
+  if (ufEditingId) {
+    const item = ufItems.find(i => i.id === ufEditingId);
+    if (item) item.confirmedSenders = [...ufPickedSenders];
+  }
+  ufEditingId = null;
+  ufPickedSenders = new Set();
+  showStep('confirm');
+  renderConfirmCards();
 }
 
 function addAndSelect() {
   const val = document.getElementById('newSenderInput').value.trim();
   if (!val) { document.getElementById('newSenderInput').focus(); return; }
-  applySender(val);
-}
-
-function applySender(name) {
-  if (ufEditingId) {
-    const item = ufItems.find(i => i.id === ufEditingId);
-    if (item) item.confirmedSender = name;
-  }
-  ufEditingId = null;
-  ufPickedSender = null;
-  showStep('confirm');
-  renderConfirmCards();
+  ufPickedSenders.add(val);
+  document.getElementById('newSenderInput').value = '';
+  renderSenderList(knownSenders().filter(s => {
+    const q = document.getElementById('senderPickerInput').value;
+    return !q || s.includes(q);
+  }));
 }
 
 function closeSenderPicker() {
   ufEditingId = null;
-  ufPickedSender = null;
+  ufPickedSenders = new Set();
   showStep('confirm');
 }
 
@@ -1413,7 +1475,7 @@ function updateMemo(id, text) {
 
 // ═══════════════════ Save ═══════════════════
 async function saveAll() {
-  if (ufItems.some(i => !i.confirmedSender)) {
+  if (ufItems.some(i => !i.confirmedSenders?.length)) {
     showToast('보낸 사람을 모두 입력해주세요');
     return;
   }
@@ -1425,7 +1487,7 @@ async function saveAll() {
       if (!item.imageData) continue;
       const msg = {
         id: uid(),
-        sender: item.confirmedSender,
+        sender: (item.confirmedSenders||[]).join(', '),
         date: item.date || today(),
         folder: '기본', memo: item.memo || '',
         imageData: item.imageData,
@@ -1459,16 +1521,14 @@ function showCompleteScreen() {
       </div>
       <div class="uf-done-footer">
         <div class="uf-done-senders">
-          <div class="uf-done-sender">
-            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-            ${esc(item.confirmedSender)}
-          </div>
+          ${renderSenderChips(item.confirmedSenders, item.id)}
         </div>
-        <span class="uf-date-text">${item.date}</span>
+        <button class="uf-chip" onclick="openDatePicker('${item.id}')">${item.date}</button>
       </div>
     </div>`).join('');
   showStep('complete');
   launchConfetti();
+  setTimeout(() => { if (document.getElementById('ufComplete').classList.contains('active')) cancelUpload(); }, 3500);
 }
 
 function launchConfetti() {
@@ -1491,11 +1551,52 @@ function launchConfetti() {
   setTimeout(() => { container.innerHTML = ''; }, 4000);
 }
 
+// ═══════════════════ Date Picker ═══════════════════
+let ufDateEditId = null;
+let dpYear = 2023, dpMonth = 11, dpDay = 8;
+
+function openDatePicker(itemId) {
+  ufDateEditId = itemId;
+  const item = ufItems.find(i => i.id === itemId);
+  if (item?.date) {
+    const parts = item.date.split('-');
+    dpYear = +parts[0]; dpMonth = +parts[1]; dpDay = +parts[2];
+  }
+  updateDatePickerDisplay();
+  document.getElementById('ufDatePicker').classList.add('open');
+}
+
+function adjustDate(unit, delta) {
+  if (unit === 'y') dpYear = Math.min(2099, Math.max(2000, dpYear + delta));
+  if (unit === 'm') { dpMonth += delta; if (dpMonth < 1) { dpMonth = 12; dpYear--; } if (dpMonth > 12) { dpMonth = 1; dpYear++; } }
+  if (unit === 'd') { const max = new Date(dpYear, dpMonth, 0).getDate(); dpDay = ((dpDay - 1 + delta + max) % max) + 1; }
+  updateDatePickerDisplay();
+}
+
+function updateDatePickerDisplay() {
+  document.getElementById('dpYear').textContent = dpYear;
+  document.getElementById('dpMonth').textContent = String(dpMonth).padStart(2, '0');
+  document.getElementById('dpDay').textContent = String(dpDay).padStart(2, '0');
+}
+
+function applyDate() {
+  const item = ufItems.find(i => i.id === ufDateEditId);
+  if (item) item.date = `${dpYear}-${String(dpMonth).padStart(2,'0')}-${String(dpDay).padStart(2,'0')}`;
+  closeDatePicker();
+  renderConfirmCards();
+}
+
+function closeDatePicker() {
+  document.getElementById('ufDatePicker').classList.remove('open');
+  ufDateEditId = null;
+}
+
 function cancelUpload() {
   stopCarouselRotation();
+  closeDatePicker();
   document.getElementById('uploadFlow').classList.remove('open');
   document.getElementById('fileInput').value = '';
-  ufItems = []; ufEditingId = null; ufPickedSender = null; ufOcrDone = false;
+  ufItems = []; ufEditingId = null; ufPickedSenders = new Set(); ufOcrDone = false;
   ufCarouselIndex = 0;
 }
 
