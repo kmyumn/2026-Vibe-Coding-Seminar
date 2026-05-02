@@ -982,6 +982,7 @@
       cursor: pointer; min-width: 36px; text-align: right;
       background: none; border: none; font-family: inherit; padding: 0;
     }
+    .uf-header-action:disabled { color: var(--text-muted); cursor: default; }
 
     /* Big title */
     .uf-page-head { padding: 20px 20px 16px; }
@@ -1050,7 +1051,7 @@
 
     /* Pending card */
     .uf-pending-card {
-      background: var(--white); border-radius: 20px;
+      background: var(--white); border-radius: var(--radius-lg) var(--radius-lg) var(--radius-lg) 0;
       margin: 0 16px 12px; overflow: hidden;
     }
     .uf-pending-img { width: 100%; max-height: 180px; object-fit: cover; object-position: top center; display: block; }
@@ -1069,7 +1070,7 @@
 
     /* Done card */
     .uf-done-card {
-      background: var(--white); border-radius: 20px;
+      background: var(--white); border-radius: var(--radius-lg) var(--radius-lg) var(--radius-lg) 0;
       margin: 0 16px 12px; overflow: hidden;
     }
     .uf-done-img-wrap { background: var(--bubble); }
@@ -1093,6 +1094,11 @@
     .uf-chip-accent { background: var(--accent); color: white; }
     .uf-chip-accent svg { stroke: white; }
     .uf-chip-count { display: inline-flex; align-items: center; background: var(--chip-bg); border-radius: var(--radius-chip); padding: var(--chip-padding-count); font-size: 12px; color: var(--text-muted); }
+    .uf-done-footer .uf-chip, .uf-pending-footer .uf-chip {
+      padding: 5px 10px; min-height: unset; font-size: 13px; font-weight: 500;
+      color: var(--text-sub); border-radius: var(--radius-pill);
+    }
+    .uf-done-footer .uf-chip-accent, .uf-pending-footer .uf-chip-accent { color: white; }
     .uf-picked-wrap {
       display: flex; gap: 8px; flex-wrap: wrap; align-items: center;
       min-height: 56px; padding: 12px 16px 4px;
@@ -1553,7 +1559,7 @@
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M14.2739 5L8.89997 10.8217C8.54637 11.2048 8.54637 11.7952 8.89997 12.1783L14.2739 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
       </div>
       <div class="uf-header-title">보낸 사람 검색</div>
-      <button class="uf-header-action" onclick="confirmSenderPicker()">완료</button>
+      <button id="ufSenderConfirmBtn" class="uf-header-action" onclick="confirmSenderPicker()" disabled>완료</button>
     </div>
     <div class="uf-picker-search">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15.4425 14.4022L20 19M16.8 10.4565C16.8 14.0224 13.9346 16.9131 10.4 16.9131C6.86537 16.9131 4 14.0224 4 10.4565C4 6.89069 6.86537 4 10.4 4C13.9346 4 16.8 6.89069 16.8 10.4565Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
@@ -2328,12 +2334,18 @@ function knownSenders() {
   )];
 }
 
+function updateSenderConfirmBtn() {
+  const hasInput = document.getElementById('senderPickerInput').value.trim().length > 0;
+  document.getElementById('ufSenderConfirmBtn').disabled = !ufPickedSenders.size && !hasInput;
+}
+
 function renderUfPickedNames() {
   const el = document.getElementById('ufPickedNames');
   const picked = [...ufPickedSenders];
   el.innerHTML = picked.map(name => `
     <button class="uf-chip" onclick="pickSender('${esc(name)}')">${esc(name)} ×</button>
   `).join('');
+  updateSenderConfirmBtn();
 }
 
 function renderSenderList(list) {
