@@ -192,7 +192,15 @@
     .lib-header { padding: 16px 16px 12px; }
     .lib-count { font-size: 24px; font-weight: 700; line-height: 1.35; }
     .lib-count span { color: var(--accent); }
-    .active-folder { background: var(--white); border-radius: var(--radius-lg) var(--radius-lg) var(--radius-lg) 0; margin: 0 16px 12px; padding: 20px; }
+    .active-folder { background: var(--white); border-radius: var(--radius-lg); margin: 0 16px 12px; padding: 20px; position: relative; }
+    .active-folder-delete {
+      position: absolute; top: 12px; right: 12px;
+      background: rgba(30,30,30,.82); color: white;
+      border: none; border-radius: 999px;
+      padding: 6px 14px; font-family: inherit; font-size: 13px; font-weight: 600;
+      cursor: pointer; display: none; z-index: 10; backdrop-filter: blur(4px);
+    }
+    .active-folder.long-pressed .active-folder-delete { display: block; }
     .folder-label { font-size: 12px; color: var(--text-sub); display: flex; align-items: center; gap: 4px; margin-bottom: 4px; }
     .folder-label svg { width: 13px; height: 13px; stroke: var(--text-sub); }
     .folder-name { font-size: 16px; font-weight: 700; margin-bottom: 12px; }
@@ -200,14 +208,22 @@
     .folder-big-count span { font-size: 15px; font-weight: 400; color: var(--text-sub); }
     .folder-actions { display: flex; gap: 10px; }
     .folder-item {
-      background: var(--white); border-radius: var(--radius-lg) var(--radius-lg) var(--radius-lg) 0;
-      margin: 0 16px 10px; padding: 18px 20px;
+      background: #F7F7F7; border-radius: 999px;
+      margin: 0 16px 10px; padding: 14px 22px;
       display: flex; justify-content: space-between; align-items: center;
-      cursor: pointer; transition: opacity .15s;
+      cursor: pointer; transition: opacity .15s; position: relative;
     }
     .folder-item:active { opacity: .8; }
     .folder-item-name { font-size: 15px; font-weight: 500; }
     .folder-item-count { font-size: 14px; color: var(--text-sub); }
+    .folder-item-delete {
+      position: absolute; top: 50%; right: 14px; transform: translateY(-50%);
+      background: rgba(30,30,30,.82); color: white;
+      border: none; border-radius: 999px;
+      padding: 5px 12px; font-family: inherit; font-size: 12px; font-weight: 600;
+      cursor: pointer; display: none; z-index: 10; backdrop-filter: blur(4px);
+    }
+    .folder-item.long-pressed .folder-item-delete { display: block; }
 
     /* ── Search ── */
     .search-wrap { padding: 8px 16px 0; }
@@ -389,9 +405,17 @@
     .fd-msg-card {
       background: var(--white); border-radius: var(--radius-lg) var(--radius-lg) var(--radius-lg) 0;
       margin: 0 16px 10px; overflow: hidden;
-      cursor: pointer; transition: opacity .15s;
+      cursor: pointer; transition: opacity .15s; position: relative;
     }
     .fd-msg-card:active { opacity: .85; }
+    .fd-msg-card-delete {
+      position: absolute; top: 10px; right: 10px;
+      background: rgba(30,30,30,.82); color: white;
+      border: none; border-radius: 999px;
+      padding: 6px 14px; font-family: inherit; font-size: 13px; font-weight: 600;
+      cursor: pointer; display: none; z-index: 10; backdrop-filter: blur(4px);
+    }
+    .fd-msg-card.long-pressed .fd-msg-card-delete { display: block; }
     .fd-msg-img { width: 100%; display: block; object-fit: cover; max-height: 280px; }
     .fd-msg-ph {
       height: 160px; background: var(--bubble);
@@ -1088,6 +1112,83 @@ function deleteMsg(e, id) {
   showToast('마음을 지웠어요');
 }
 
+// ── Folder long-press ──
+let _flpTimer = null;
+let _flpActive = false;
+
+function startFolderLongPress(e, elId) {
+  _flpActive = false;
+  _flpTimer = setTimeout(() => {
+    _flpActive = true;
+    const el = document.getElementById(elId);
+    if (el) el.classList.add('long-pressed');
+  }, 600);
+}
+function endFolderLongPress() { clearTimeout(_flpTimer); }
+function triggerFolderLongPress(e, elId) {
+  e.preventDefault();
+  _flpActive = true;
+  const el = document.getElementById(elId);
+  if (el) el.classList.add('long-pressed');
+}
+function onFolderItemClick(e, elId, name) {
+  if (_flpActive) { _flpActive = false; return; }
+  const el = document.getElementById(elId);
+  if (el && el.classList.contains('long-pressed')) {
+    el.classList.remove('long-pressed'); return;
+  }
+  openFolderDetail(name);
+}
+function deleteFolder(e, name) {
+  e.stopPropagation();
+  const toDelete = msgs.filter(m => (m.folder||'기본') === name);
+  const count = toDelete.length;
+  if (dbAvailable) {
+    toDelete.forEach(m => { try { tx('readwrite').delete(m.id); } catch(_) {} });
+  }
+  msgs = msgs.filter(m => (m.folder||'기본') !== name);
+  renderHome();
+  renderLibrary();
+  showToast(`${count}개의 마음을 지웠어요`);
+}
+
+// ── fd-msg-card long-press ──
+let _fdlpTimer = null;
+let _fdlpActive = false;
+
+function startFdLongPress(e, id) {
+  _fdlpActive = false;
+  _fdlpTimer = setTimeout(() => {
+    _fdlpActive = true;
+    const card = document.getElementById('fdcard-' + id);
+    if (card) card.classList.add('long-pressed');
+  }, 600);
+}
+function endFdLongPress() { clearTimeout(_fdlpTimer); }
+function triggerFdLongPress(e, id) {
+  e.preventDefault();
+  _fdlpActive = true;
+  const card = document.getElementById('fdcard-' + id);
+  if (card) card.classList.add('long-pressed');
+}
+function onFdCardClick(e, id) {
+  if (_fdlpActive) { _fdlpActive = false; return; }
+  const card = document.getElementById('fdcard-' + id);
+  if (card && card.classList.contains('long-pressed')) {
+    card.classList.remove('long-pressed'); return;
+  }
+  openDetail(id);
+}
+function deleteFdMsg(e, id) {
+  e.stopPropagation();
+  msgs = msgs.filter(m => m.id !== id);
+  if (dbAvailable) { try { tx('readwrite').delete(id); } catch(_) {} }
+  renderHome();
+  renderLibrary();
+  renderFolderDetail();
+  showToast('마음을 지웠어요');
+}
+
 function emptyState(text) {
   return `<div class="empty">
     <div class="empty-illust"><svg width="360" height="184" viewBox="0 0 360 184" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -1183,7 +1284,12 @@ function renderLibrary() {
   if (!entries.length) { el.innerHTML = emptyState('아직 보관된 마음이 없어요'); return; }
   const [[fname, fmsgs], ...rest] = entries;
   let html = `
-    <div class="active-folder">
+    <div class="active-folder" id="af-main"
+      ontouchstart="startFolderLongPress(event,'af-main')"
+      ontouchend="endFolderLongPress()"
+      ontouchmove="endFolderLongPress()"
+      oncontextmenu="triggerFolderLongPress(event,'af-main')">
+      <button class="active-folder-delete" onclick="deleteFolder(event,'${esc(fname)}')">지우기</button>
       <div class="folder-label">
         <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>기본 폴더
       </div>
@@ -1194,8 +1300,18 @@ function renderLibrary() {
         <button class="btn-fill"    onclick="openFolderDetail('${esc(fname)}')">편집</button>
       </div>
     </div>`;
-  rest.forEach(([n, ms]) => {
-    html += `<div class="folder-item" onclick="openFolderDetail('${esc(n)}')"><div class="folder-item-name">${esc(n)}</div><div class="folder-item-count">${ms.length} 개</div></div>`;
+  rest.forEach(([n, ms], idx) => {
+    const fiId = `fi-${idx}`;
+    html += `<div class="folder-item" id="${fiId}"
+      onclick="onFolderItemClick(event,'${fiId}','${esc(n)}')"
+      ontouchstart="startFolderLongPress(event,'${fiId}')"
+      ontouchend="endFolderLongPress()"
+      ontouchmove="endFolderLongPress()"
+      oncontextmenu="triggerFolderLongPress(event,'${fiId}')">
+      <button class="folder-item-delete" onclick="deleteFolder(event,'${esc(n)}')">지우기</button>
+      <div class="folder-item-name">${esc(n)}</div>
+      <div class="folder-item-count">${ms.length} 개</div>
+    </div>`;
   });
   el.innerHTML = html;
 }
@@ -1789,7 +1905,13 @@ function renderFolderDetail() {
   body.innerHTML = Object.entries(byMonth).map(([month, items]) => `
     <div class="fd-month-header">${month}</div>
     ${items.map(m => `
-      <div class="fd-msg-card" onclick="openDetail('${m.id}')">
+      <div class="fd-msg-card" id="fdcard-${m.id}"
+        onclick="onFdCardClick(event,'${m.id}')"
+        ontouchstart="startFdLongPress(event,'${m.id}')"
+        ontouchend="endFdLongPress()"
+        ontouchmove="endFdLongPress()"
+        oncontextmenu="triggerFdLongPress(event,'${m.id}')">
+        <button class="fd-msg-card-delete" onclick="deleteFdMsg(event,'${m.id}')">지우기</button>
         ${m.imageData
           ? `<img class="fd-msg-img" src="${m.imageData}" alt="">`
           : `<div class="fd-msg-ph"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>`}
